@@ -1,16 +1,20 @@
 # Prerequisites
 *.d
-
+*.crf
+*axf
+*.htm
+*.lnp
 # Object files
 *.o
 *.ko
 *.obj
 *.elf
-
+*.dep
 # Linker output
 *.ilk
 *.map
 *.exp
+*.sct
 
 # Precompiled Headers
 *.gch
