@@ -12,6 +12,7 @@
 #include "ano_dt.h"
 #include "bin_dt.h"
 
+
 /////////////////////////////////////////////////////////////////////////////////////
 //数据拆分宏定义，在发送大于1字节的数据类型时，比如int16、float等，需要把数据拆分成单独字节进行发送
 #define BYTE0(dwTemp)       ( *( (char *)(&dwTemp)		) )
@@ -22,9 +23,10 @@
 dt_flag_t f;					//需要发送数据的标志
 u8 data_to_send[50];	//发送数据缓存
 u16 aux[6] = {0};
-struct class_attitude att = {0};	//遥控器控制信息
-struct class_motor motor= {0};	//电机转速
-struct class_aircraft aircraft = {0};	//飞机状态
+
+//struct class_attitude att = {0};	//遥控器控制信息
+//struct class_motor motor= {0};	//电机转速
+//struct class_aircraft aircraft = {0};	//飞机状态
 
 /////////////////////////////////////////////////////////////////////////////////////
 //Data_Exchange函数处理各种数据发送请求，比如想实现每5ms发送一次传感器数据至上位机，即在此函数内实现
@@ -129,17 +131,14 @@ void ANO_DT_Data_Exchange(void)
 //移植时，用户应根据自身应用的情况，根据使用的通信方式，实现此函数
 void ANO_DT_Send_Data(u8 *dataToSend , u8 length)
 {
-#ifdef ANO_DT_USE_USB_HID
-	Usb_Hid_Adddata(data_to_send,length);
-#endif
-#ifdef ANO_DT_USE_USART2
+
 	while(length--)
 	{
-		uart_put_char(*dataToSend);
+		while((USART1->SR&0X40)==0);
+		USART1->DR = *dataToSend;  
 		dataToSend++;
 	}
-	
-#endif
+
 }
 
 static void ANO_DT_Send_Check(u8 head, u8 check_sum)
@@ -352,13 +351,13 @@ void ANO_DT_Send_Status(float angle_rol, float angle_pit, float angle_yaw, s32 a
 	data_to_send[_cnt++]=0x01;
 	data_to_send[_cnt++]=0;
 	
-	_temp = (int)(angle_rol);
+	_temp = (int)(angle_rol*100);
 	data_to_send[_cnt++]=BYTE1(_temp);
 	data_to_send[_cnt++]=BYTE0(_temp);
-	_temp = (int)(angle_pit);
+	_temp = (int)(angle_pit*100);
 	data_to_send[_cnt++]=BYTE1(_temp);
 	data_to_send[_cnt++]=BYTE0(_temp);
-	_temp = (int)(angle_yaw);
+	_temp = (int)(angle_yaw*100);
 	data_to_send[_cnt++]=BYTE1(_temp);
 	data_to_send[_cnt++]=BYTE0(_temp);
 	

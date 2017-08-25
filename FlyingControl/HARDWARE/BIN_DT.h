@@ -1,5 +1,5 @@
-#ifndef _DATA_TRANSFER_H
-#define	_DATA_TRANSFER_H
+#ifndef _BIN_DATA_TRANSFER_H
+#define	_BIN_DATA_TRANSFER_H
 
 #include "sys.h"
 
@@ -21,33 +21,10 @@ typedef struct
 		u8 send_motopwm;
 		u8 send_power;
 
-}dt_flag_t;
+}bin_dt_flag_t;
 
-struct class_attitude
-{
-u16 thr;
-u16 yaw;
-u16 rol;
-u16 pit;
-};
 
-struct class_motor
-{
-u16 PWM_1;
-u16 PWM_2;
-u16 PWM_3;
-u16 PWM_4;
-}; 
 
-struct class_aircraft	//飞机信息
-{
-u32 atl;	//高度
-short int yaw;
-short int rol;
-short int pit;
-u8 fly_model;
-u8 armed;	
-};
 
 struct coordinate
 {

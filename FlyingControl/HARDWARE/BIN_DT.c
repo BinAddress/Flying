@@ -2,6 +2,7 @@
 #include "bin_dt.h"
 #include "mpu9250.h"
 #include "24l01.h"
+#include "ano_dt.h"
 
 /////////////////////////////////////////////////////////////////////////////////////
 //数据拆分宏定义，在发送大于1字节的数据类型时，比如int16、float等，需要把数据拆分成单独字节进行发送
@@ -10,9 +11,10 @@
 #define BYTE2(dwTemp)       ( *( (char *)(&dwTemp) + 2) )
 #define BYTE3(dwTemp)       ( *( (char *)(&dwTemp) + 3) )
 
-dt_flag_t f;					//需要发送数据的标志
-u8 data_to_send[32];	//发送数据缓存
-u16 aux[6] = {0};
+bin_dt_flag_t bin_f;					//需要发送数据的标志
+u8 bin_data_to_send[32];	//发送数据缓存
+u16 bin_aux[6] = {0};
+
 struct class_attitude att = {0}; //遥控器信息
 struct class_motor motor= {0};	//电机转速
 struct class_aircraft aircraft;	//飞机信息
@@ -31,79 +33,79 @@ void BIN_DT_Data_Exchange(void)
 	static u8 power_cnt		=	50;
 	
 	if((cnt % senser_cnt) == (senser_cnt-1))
-		f.send_senser = 1;	
+		bin_f.send_senser = 1;	
 	
 	if((cnt % status_cnt) == (status_cnt-1))
-		f.send_status = 1;	
+		bin_f.send_status = 1;	
 	
 	if((cnt % rcdata_cnt) == (rcdata_cnt-1))
-		f.send_rcdata = 1;	
+		bin_f.send_rcdata = 1;	
 	
 	if((cnt % motopwm_cnt) == (motopwm_cnt-1))
-		f.send_motopwm = 1;	
+		bin_f.send_motopwm = 1;	
 	
 	if((cnt % power_cnt) == (power_cnt-1))
-		f.send_power = 1;		
+		bin_f.send_power = 1;		
 	
 	cnt++;
 /////////////////////////////////////////////////////////////////////////////////////
-	if(f.send_version)
+	if(bin_f.send_version)
 	{
-		f.send_version = 0;
+		bin_f.send_version = 0;
 //		BIN_DT_Send_Version(4,300,100,400,0);
 	}
 /////////////////////////////////////////////////////////////////////////////////////
-	else if(f.send_status)
+	else if(bin_f.send_status)
 	{
-		f.send_status = 0;
+		bin_f.send_status = 0;
 		BIN_DT_Send_Status(aircraft.rol,aircraft.pit,aircraft.yaw,aircraft.atl,0,0);
 	}	
 /////////////////////////////////////////////////////////////////////////////////////
-	else if(f.send_senser)
+	else if(bin_f.send_senser)
 	{
-		f.send_senser = 0;
+		bin_f.send_senser = 0;
 		BIN_DT_Send_Senser(mpu9250.accel.x,mpu9250.accel.y,mpu9250.accel.z,
 												mpu9250.gyro.x,mpu9250.gyro.y,mpu9250.gyro.z,
 												mpu9250.mag.x,mpu9250.mag.y,mpu9250.mag.z,mpu9250.temp);
 	}	
 /////////////////////////////////////////////////////////////////////////////////////
-	else if(f.send_rcdata)
+	else if(bin_f.send_rcdata)
 	{
-		f.send_rcdata = 0;
+		bin_f.send_rcdata = 0;
 //		BIN_DT_Send_RCData(att.thr,att.yaw,att.rol,att.pit,aux[0],aux[1],aux[2],aux[3],aux[4],aux[5]);
 	}	
 /////////////////////////////////////////////////////////////////////////////////////	
-	else if(f.send_motopwm)
+	else if(bin_f.send_motopwm)
 	{
-		f.send_motopwm = 0;
+		bin_f.send_motopwm = 0;
 		BIN_DT_Send_MotoPWM(motor.PWM_1,motor.PWM_2,motor.PWM_3,motor.PWM_4,5,6,7,8);
 	}	
 /////////////////////////////////////////////////////////////////////////////////////
-	else if(f.send_power)
+	else if(bin_f.send_power)
 	{
-		f.send_power = 0;
+		bin_f.send_power = 0;
 		BIN_DT_Send_Power(123,456);
 	}
 /////////////////////////////////////////////////////////////////////////////////////
-	else if(f.send_pid1)
+	else if(bin_f.send_pid1)
 	{
-		f.send_pid1 = 0;
+		bin_f.send_pid1 = 0;
 //		BIN_DT_Send_PID(1,ctrl_1.PID[PIDROLL].kp,ctrl_1.PID[PIDROLL].ki,ctrl_1.PID[PIDROLL].kd,
 //											ctrl_1.PID[PIDPITCH].kp,ctrl_1.PID[PIDPITCH].ki,ctrl_1.PID[PIDPITCH].kd,
 //											ctrl_1.PID[PIDYAW].kp,ctrl_1.PID[PIDYAW].ki,ctrl_1.PID[PIDYAW].kd);
 	}	
 /////////////////////////////////////////////////////////////////////////////////////
-	else if(f.send_pid2)
+	else if(bin_f.send_pid2)
 	{
-		f.send_pid2 = 0;
+		bin_f.send_pid2 = 0;
 //		BIN_DT_Send_PID(2,ctrl_1.PID[PID4].kp,ctrl_1.PID[PID4].ki,ctrl_1.PID[PID4].kd,
 //											ctrl_1.PID[PID5].kp,ctrl_1.PID[PID5].ki,ctrl_1.PID[PID5].kd,
 //											ctrl_1.PID[PID6].kp,ctrl_1.PID[PID6].ki,ctrl_1.PID[PID6].kd);
 	}
 /////////////////////////////////////////////////////////////////////////////////////
-	else if(f.send_pid3)
+	else if(bin_f.send_pid3)
 	{
-		f.send_pid3 = 0;
+		bin_f.send_pid3 = 0;
 //		BIN_DT_Send_PID(3,ctrl_2.PID[PIDROLL].kp,ctrl_2.PID[PIDROLL].ki,ctrl_2.PID[PIDROLL].kd,
 //											ctrl_2.PID[PIDPITCH].kp,ctrl_2.PID[PIDPITCH].ki,ctrl_2.PID[PIDPITCH].kd,
 //											ctrl_2.PID[PIDYAW].kp,ctrl_2.PID[PIDYAW].ki,ctrl_2.PID[PIDYAW].kd);
@@ -123,7 +125,7 @@ void BIN_DT_Send_Data(u8 *dataToSend , u8 length)
 {	
 		u8 i = 0;
 	
-		data_to_send[length+1] = 0;
+		bin_data_to_send[length+1] = 0;
 		if(length < 31)
 		{
 			NRF24L01_TX_Mode();
@@ -147,19 +149,19 @@ static void BIN_DT_Send_Check(u8 head, u8 check_sum)
 	u8 sum;
 	u8 i;
 	
-	data_to_send[0]=0xAA;
-	data_to_send[1]=0xAA;
-	data_to_send[2]=0xEF;
-	data_to_send[3]=2;
-	data_to_send[4]=head;
-	data_to_send[5]=check_sum;
+	bin_data_to_send[0]=0xAA;
+	bin_data_to_send[1]=0xAA;
+	bin_data_to_send[2]=0xEF;
+	bin_data_to_send[3]=2;
+	bin_data_to_send[4]=head;
+	bin_data_to_send[5]=check_sum;
 	
 	sum = 0;
 	for(i=0;i<6;i++)
-		sum += data_to_send[i];
-	data_to_send[6]=sum;
+		sum += bin_data_to_send[i];
+	bin_data_to_send[6]=sum;
 
-	BIN_DT_Send_Data(data_to_send, 7);
+	BIN_DT_Send_Data(bin_data_to_send, 7);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -239,12 +241,12 @@ void BIN_DT_Data_Receive_Anl(u8 *data_buf,u8 num)
 	{
 		if(*(data_buf+4)==0X01)
 		{
-			f.send_pid1 = 1;
-			f.send_pid2 = 1;
-			f.send_pid3 = 1;
-			f.send_pid4 = 1;
-			f.send_pid5 = 1;
-			f.send_pid6 = 1;
+			bin_f.send_pid1 = 1;
+			bin_f.send_pid2 = 1;
+			bin_f.send_pid3 = 1;
+			bin_f.send_pid4 = 1;
+			bin_f.send_pid5 = 1;
+			bin_f.send_pid6 = 1;
 		}
 		if(*(data_buf+4)==0X02)
 		{
@@ -252,7 +254,7 @@ void BIN_DT_Data_Receive_Anl(u8 *data_buf,u8 num)
 		}
 		if(*(data_buf+4)==0XA0)		//读取版本信息
 		{
-			f.send_version = 1;
+			bin_f.send_version = 1;
 		}
 		if(*(data_buf+4)==0XA1)		//恢复默认参数
 		{
@@ -320,29 +322,29 @@ void BIN_DT_Send_Version(u8 hardware_type, u16 hardware_ver,u16 software_ver,u16
 {
 	u8 i,sum;
 	u8 _cnt=0;
-	data_to_send[_cnt++]=0xAA;
-	data_to_send[_cnt++]=0xAA;
-	data_to_send[_cnt++]=0x00;
-	data_to_send[_cnt++]=0;
+	bin_data_to_send[_cnt++]=0xAA;
+	bin_data_to_send[_cnt++]=0xAA;
+	bin_data_to_send[_cnt++]=0x00;
+	bin_data_to_send[_cnt++]=0;
 	
-	data_to_send[_cnt++]=hardware_type;
-	data_to_send[_cnt++]=BYTE1(hardware_ver);
-	data_to_send[_cnt++]=BYTE0(hardware_ver);
-	data_to_send[_cnt++]=BYTE1(software_ver);
-	data_to_send[_cnt++]=BYTE0(software_ver);
-	data_to_send[_cnt++]=BYTE1(protocol_ver);
-	data_to_send[_cnt++]=BYTE0(protocol_ver);
-	data_to_send[_cnt++]=BYTE1(bootloader_ver);
-	data_to_send[_cnt++]=BYTE0(bootloader_ver);
+	bin_data_to_send[_cnt++]=hardware_type;
+	bin_data_to_send[_cnt++]=BYTE1(hardware_ver);
+	bin_data_to_send[_cnt++]=BYTE0(hardware_ver);
+	bin_data_to_send[_cnt++]=BYTE1(software_ver);
+	bin_data_to_send[_cnt++]=BYTE0(software_ver);
+	bin_data_to_send[_cnt++]=BYTE1(protocol_ver);
+	bin_data_to_send[_cnt++]=BYTE0(protocol_ver);
+	bin_data_to_send[_cnt++]=BYTE1(bootloader_ver);
+	bin_data_to_send[_cnt++]=BYTE0(bootloader_ver);
 	
-	data_to_send[3] = _cnt-4;
+	bin_data_to_send[3] = _cnt-4;
 	
 	sum= 0;
 	for(i=0;i<_cnt;i++)
-		sum += data_to_send[i];
-	data_to_send[_cnt++]=sum;
+		sum += bin_data_to_send[i];
+	bin_data_to_send[_cnt++]=sum;
 	
-	BIN_DT_Send_Data(data_to_send, _cnt);
+	BIN_DT_Send_Data(bin_data_to_send, _cnt);
 }
 void BIN_DT_Send_Status(float angle_rol, float angle_pit, float angle_yaw, s32 alt, u8 fly_model, u8 armed)
 {
@@ -350,189 +352,189 @@ void BIN_DT_Send_Status(float angle_rol, float angle_pit, float angle_yaw, s32 a
 	vs16 _temp;
 	vs32 _temp2 = alt;
 	u8 i,sum;
-	data_to_send[_cnt++]=0xAA;
-	data_to_send[_cnt++]=0xAA;
-	data_to_send[_cnt++]=0x01;
-	data_to_send[_cnt++]=0;
+	bin_data_to_send[_cnt++]=0xAA;
+	bin_data_to_send[_cnt++]=0xAA;
+	bin_data_to_send[_cnt++]=0x01;
+	bin_data_to_send[_cnt++]=0;
 	
-	_temp = (int)(angle_rol*100);
-	data_to_send[_cnt++]=BYTE1(_temp);
-	data_to_send[_cnt++]=BYTE0(_temp);
-	_temp = (int)(angle_pit*100);
-	data_to_send[_cnt++]=BYTE1(_temp);
-	data_to_send[_cnt++]=BYTE0(_temp);
-	_temp = (int)(angle_yaw*100);
-	data_to_send[_cnt++]=BYTE1(_temp);
-	data_to_send[_cnt++]=BYTE0(_temp);
+	_temp = (int)(angle_rol);
+	bin_data_to_send[_cnt++]=BYTE1(_temp);
+	bin_data_to_send[_cnt++]=BYTE0(_temp);
+	_temp = (int)(angle_pit);
+	bin_data_to_send[_cnt++]=BYTE1(_temp);
+	bin_data_to_send[_cnt++]=BYTE0(_temp);
+	_temp = (int)(angle_yaw);
+	bin_data_to_send[_cnt++]=BYTE1(_temp);
+	bin_data_to_send[_cnt++]=BYTE0(_temp);
 	
-	data_to_send[_cnt++]=BYTE3(_temp2);
-	data_to_send[_cnt++]=BYTE2(_temp2);
-	data_to_send[_cnt++]=BYTE1(_temp2);
-	data_to_send[_cnt++]=BYTE0(_temp2);
+	bin_data_to_send[_cnt++]=BYTE3(_temp2);
+	bin_data_to_send[_cnt++]=BYTE2(_temp2);
+	bin_data_to_send[_cnt++]=BYTE1(_temp2);
+	bin_data_to_send[_cnt++]=BYTE0(_temp2);
 	
-	data_to_send[_cnt++] = fly_model;
+	bin_data_to_send[_cnt++] = fly_model;
 	
-	data_to_send[_cnt++] = armed;
+	bin_data_to_send[_cnt++] = armed;
 	
-	data_to_send[3] = _cnt-4;
+	bin_data_to_send[3] = _cnt-4;
 	
 	sum= 0;
 	for(i=0;i<_cnt;i++)
-		sum += data_to_send[i];
-	data_to_send[_cnt++]=sum;
+		sum += bin_data_to_send[i];
+	bin_data_to_send[_cnt++]=sum;
 	
-	BIN_DT_Send_Data(data_to_send, _cnt);
+	BIN_DT_Send_Data(bin_data_to_send, _cnt);
 }
 void BIN_DT_Send_Senser(s16 a_x,s16 a_y,s16 a_z,s16 g_x,s16 g_y,s16 g_z,s16 m_x,s16 m_y,s16 m_z,s32 bar)
 {
 	u8 _cnt=0;
 	vs16 _temp;
 	u8 i,sum;
-	data_to_send[_cnt++]=0xAA;
-	data_to_send[_cnt++]=0xAA;
-	data_to_send[_cnt++]=0x02;
-	data_to_send[_cnt++]=0;
+	bin_data_to_send[_cnt++]=0xAA;
+	bin_data_to_send[_cnt++]=0xAA;
+	bin_data_to_send[_cnt++]=0x02;
+	bin_data_to_send[_cnt++]=0;
 	
 	_temp = a_x;
-	data_to_send[_cnt++]=BYTE1(_temp);
-	data_to_send[_cnt++]=BYTE0(_temp);
+	bin_data_to_send[_cnt++]=BYTE1(_temp);
+	bin_data_to_send[_cnt++]=BYTE0(_temp);
 	_temp = a_y;
-	data_to_send[_cnt++]=BYTE1(_temp);
-	data_to_send[_cnt++]=BYTE0(_temp);
+	bin_data_to_send[_cnt++]=BYTE1(_temp);
+	bin_data_to_send[_cnt++]=BYTE0(_temp);
 	_temp = a_z;	
-	data_to_send[_cnt++]=BYTE1(_temp);
-	data_to_send[_cnt++]=BYTE0(_temp);
+	bin_data_to_send[_cnt++]=BYTE1(_temp);
+	bin_data_to_send[_cnt++]=BYTE0(_temp);
 	
 	_temp = g_x;	
-	data_to_send[_cnt++]=BYTE1(_temp);
-	data_to_send[_cnt++]=BYTE0(_temp);
+	bin_data_to_send[_cnt++]=BYTE1(_temp);
+	bin_data_to_send[_cnt++]=BYTE0(_temp);
 	_temp = g_y;	
-	data_to_send[_cnt++]=BYTE1(_temp);
-	data_to_send[_cnt++]=BYTE0(_temp);
+	bin_data_to_send[_cnt++]=BYTE1(_temp);
+	bin_data_to_send[_cnt++]=BYTE0(_temp);
 	_temp = g_z;	
-	data_to_send[_cnt++]=BYTE1(_temp);
-	data_to_send[_cnt++]=BYTE0(_temp);
+	bin_data_to_send[_cnt++]=BYTE1(_temp);
+	bin_data_to_send[_cnt++]=BYTE0(_temp);
 	
 	_temp = m_x;	
-	data_to_send[_cnt++]=BYTE1(_temp);
-	data_to_send[_cnt++]=BYTE0(_temp);
+	bin_data_to_send[_cnt++]=BYTE1(_temp);
+	bin_data_to_send[_cnt++]=BYTE0(_temp);
 	_temp = m_y;	
-	data_to_send[_cnt++]=BYTE1(_temp);
-	data_to_send[_cnt++]=BYTE0(_temp);
+	bin_data_to_send[_cnt++]=BYTE1(_temp);
+	bin_data_to_send[_cnt++]=BYTE0(_temp);
 	_temp = m_z;	
-	data_to_send[_cnt++]=BYTE1(_temp);
-	data_to_send[_cnt++]=BYTE0(_temp);
+	bin_data_to_send[_cnt++]=BYTE1(_temp);
+	bin_data_to_send[_cnt++]=BYTE0(_temp);
 	
-	data_to_send[3] = _cnt-4;
+	bin_data_to_send[3] = _cnt-4;
 	
 	sum= 0;
 	for(i=0;i<_cnt;i++)
-		sum += data_to_send[i];
-	data_to_send[_cnt++] = sum;
+		sum += bin_data_to_send[i];
+	bin_data_to_send[_cnt++] = sum;
 	
-	BIN_DT_Send_Data(data_to_send, _cnt);
+	BIN_DT_Send_Data(bin_data_to_send, _cnt);
 }
-void BIN_DT_Send_RCData(u16 thr,u16 yaw,u16 rol,u16 pit,u16 aux1,u16 aux2,u16 aux3,u16 aux4,u16 aux5,u16 aux6)
+void BIN_DT_Send_RCData(u16 thr,u16 yaw,u16 rol,u16 pit,u16 bin_aux1,u16 bin_aux2,u16 bin_aux3,u16 bin_aux4,u16 bin_aux5,u16 bin_aux6)
 {
 	u8 _cnt=0;
 	u8 i,sum;
-	data_to_send[_cnt++]=0xAA;
-	data_to_send[_cnt++]=0xAA;
-	data_to_send[_cnt++]=0x03;
-	data_to_send[_cnt++]=0;
-	data_to_send[_cnt++]=BYTE1(thr);
-	data_to_send[_cnt++]=BYTE0(thr);
-	data_to_send[_cnt++]=BYTE1(yaw);
-	data_to_send[_cnt++]=BYTE0(yaw);
-	data_to_send[_cnt++]=BYTE1(rol);
-	data_to_send[_cnt++]=BYTE0(rol);
-	data_to_send[_cnt++]=BYTE1(pit);
-	data_to_send[_cnt++]=BYTE0(pit);
-	data_to_send[_cnt++]=BYTE1(aux1);
-	data_to_send[_cnt++]=BYTE0(aux1);
-	data_to_send[_cnt++]=BYTE1(aux2);
-	data_to_send[_cnt++]=BYTE0(aux2);
-	data_to_send[_cnt++]=BYTE1(aux3);
-	data_to_send[_cnt++]=BYTE0(aux3);
-	data_to_send[_cnt++]=BYTE1(aux4);
-	data_to_send[_cnt++]=BYTE0(aux4);
-	data_to_send[_cnt++]=BYTE1(aux5);
-	data_to_send[_cnt++]=BYTE0(aux5);
-	data_to_send[_cnt++]=BYTE1(aux6);
-	data_to_send[_cnt++]=BYTE0(aux6);
+	bin_data_to_send[_cnt++]=0xAA;
+	bin_data_to_send[_cnt++]=0xAA;
+	bin_data_to_send[_cnt++]=0x03;
+	bin_data_to_send[_cnt++]=0;
+	bin_data_to_send[_cnt++]=BYTE1(thr);
+	bin_data_to_send[_cnt++]=BYTE0(thr);
+	bin_data_to_send[_cnt++]=BYTE1(yaw);
+	bin_data_to_send[_cnt++]=BYTE0(yaw);
+	bin_data_to_send[_cnt++]=BYTE1(rol);
+	bin_data_to_send[_cnt++]=BYTE0(rol);
+	bin_data_to_send[_cnt++]=BYTE1(pit);
+	bin_data_to_send[_cnt++]=BYTE0(pit);
+	bin_data_to_send[_cnt++]=BYTE1(bin_aux1);
+	bin_data_to_send[_cnt++]=BYTE0(bin_aux1);
+	bin_data_to_send[_cnt++]=BYTE1(bin_aux2);
+	bin_data_to_send[_cnt++]=BYTE0(bin_aux2);
+	bin_data_to_send[_cnt++]=BYTE1(bin_aux3);
+	bin_data_to_send[_cnt++]=BYTE0(bin_aux3);
+	bin_data_to_send[_cnt++]=BYTE1(bin_aux4);
+	bin_data_to_send[_cnt++]=BYTE0(bin_aux4);
+	bin_data_to_send[_cnt++]=BYTE1(bin_aux5);
+	bin_data_to_send[_cnt++]=BYTE0(bin_aux5);
+	bin_data_to_send[_cnt++]=BYTE1(bin_aux6);
+	bin_data_to_send[_cnt++]=BYTE0(bin_aux6);
 
-	data_to_send[3] = _cnt-4;
+	bin_data_to_send[3] = _cnt-4;
 	
 	sum= 0;
 	for(i=0;i<_cnt;i++)
-		sum += data_to_send[i];
+		sum += bin_data_to_send[i];
 	
-	data_to_send[_cnt++]=sum;
+	bin_data_to_send[_cnt++]=sum;
 	
-	BIN_DT_Send_Data(data_to_send, _cnt);
+	BIN_DT_Send_Data(bin_data_to_send, _cnt);
 }
 void BIN_DT_Send_Power(u16 votage, u16 current)
 {
 	u8 _cnt=0;
 	u16 temp;
 	u8 i,sum;
-	data_to_send[_cnt++]=0xAA;
-	data_to_send[_cnt++]=0xAA;
-	data_to_send[_cnt++]=0x05;
-	data_to_send[_cnt++]=0;
+	bin_data_to_send[_cnt++]=0xAA;
+	bin_data_to_send[_cnt++]=0xAA;
+	bin_data_to_send[_cnt++]=0x05;
+	bin_data_to_send[_cnt++]=0;
 	
 	temp = votage;
-	data_to_send[_cnt++]=BYTE1(temp);
-	data_to_send[_cnt++]=BYTE0(temp);
+	bin_data_to_send[_cnt++]=BYTE1(temp);
+	bin_data_to_send[_cnt++]=BYTE0(temp);
 	temp = current;
-	data_to_send[_cnt++]=BYTE1(temp);
-	data_to_send[_cnt++]=BYTE0(temp);
+	bin_data_to_send[_cnt++]=BYTE1(temp);
+	bin_data_to_send[_cnt++]=BYTE0(temp);
 	
-	data_to_send[3] = _cnt-4;
+	bin_data_to_send[3] = _cnt-4;
 	
 	sum= 0;
 	for(i=0;i<_cnt;i++)
-		sum += data_to_send[i];
+		sum += bin_data_to_send[i];
 	
-	data_to_send[_cnt++]=sum;
+	bin_data_to_send[_cnt++]=sum;
 	
-	BIN_DT_Send_Data(data_to_send, _cnt);
+	BIN_DT_Send_Data(bin_data_to_send, _cnt);
 }
 void BIN_DT_Send_MotoPWM(u16 m_1,u16 m_2,u16 m_3,u16 m_4,u16 m_5,u16 m_6,u16 m_7,u16 m_8)
 {
 	u8 _cnt=0;
 	u8 i,sum;
-	data_to_send[_cnt++]=0xAA;
-	data_to_send[_cnt++]=0xAA;
-	data_to_send[_cnt++]=0x06;
-	data_to_send[_cnt++]=0;
+	bin_data_to_send[_cnt++]=0xAA;
+	bin_data_to_send[_cnt++]=0xAA;
+	bin_data_to_send[_cnt++]=0x06;
+	bin_data_to_send[_cnt++]=0;
 	
-	data_to_send[_cnt++]=BYTE1(m_1);
-	data_to_send[_cnt++]=BYTE0(m_1);
-	data_to_send[_cnt++]=BYTE1(m_2);
-	data_to_send[_cnt++]=BYTE0(m_2);
-	data_to_send[_cnt++]=BYTE1(m_3);
-	data_to_send[_cnt++]=BYTE0(m_3);
-	data_to_send[_cnt++]=BYTE1(m_4);
-	data_to_send[_cnt++]=BYTE0(m_4);
-	data_to_send[_cnt++]=BYTE1(m_5);
-	data_to_send[_cnt++]=BYTE0(m_5);
-	data_to_send[_cnt++]=BYTE1(m_6);
-	data_to_send[_cnt++]=BYTE0(m_6);
-	data_to_send[_cnt++]=BYTE1(m_7);
-	data_to_send[_cnt++]=BYTE0(m_7);
-	data_to_send[_cnt++]=BYTE1(m_8);
-	data_to_send[_cnt++]=BYTE0(m_8);
+	bin_data_to_send[_cnt++]=BYTE1(m_1);
+	bin_data_to_send[_cnt++]=BYTE0(m_1);
+	bin_data_to_send[_cnt++]=BYTE1(m_2);
+	bin_data_to_send[_cnt++]=BYTE0(m_2);
+	bin_data_to_send[_cnt++]=BYTE1(m_3);
+	bin_data_to_send[_cnt++]=BYTE0(m_3);
+	bin_data_to_send[_cnt++]=BYTE1(m_4);
+	bin_data_to_send[_cnt++]=BYTE0(m_4);
+	bin_data_to_send[_cnt++]=BYTE1(m_5);
+	bin_data_to_send[_cnt++]=BYTE0(m_5);
+	bin_data_to_send[_cnt++]=BYTE1(m_6);
+	bin_data_to_send[_cnt++]=BYTE0(m_6);
+	bin_data_to_send[_cnt++]=BYTE1(m_7);
+	bin_data_to_send[_cnt++]=BYTE0(m_7);
+	bin_data_to_send[_cnt++]=BYTE1(m_8);
+	bin_data_to_send[_cnt++]=BYTE0(m_8);
 	
-	data_to_send[3] = _cnt-4;
+	bin_data_to_send[3] = _cnt-4;
 	
 	sum= 0;
 	for(i=0;i<_cnt;i++)
-		sum += data_to_send[i];
+		sum += bin_data_to_send[i];
 	
-	data_to_send[_cnt++]=sum;
+	bin_data_to_send[_cnt++]=sum;
 	
-	BIN_DT_Send_Data(data_to_send, _cnt);
+	BIN_DT_Send_Data(bin_data_to_send, _cnt);
 }
 void BIN_DT_Send_PID(u8 group,float p1_p,float p1_i,float p1_d,float p2_p,float p2_i,float p2_d,float p3_p,float p3_i,float p3_d)
 {
@@ -540,49 +542,49 @@ void BIN_DT_Send_PID(u8 group,float p1_p,float p1_i,float p1_d,float p2_p,float 
 	vs16 _temp;
 	u8 i,sum;
 	
-	data_to_send[_cnt++]=0xAA;
-	data_to_send[_cnt++]=0xAA;
-	data_to_send[_cnt++]=0x10+group-1;
-	data_to_send[_cnt++]=0;
+	bin_data_to_send[_cnt++]=0xAA;
+	bin_data_to_send[_cnt++]=0xAA;
+	bin_data_to_send[_cnt++]=0x10+group-1;
+	bin_data_to_send[_cnt++]=0;
 	
 	
 	_temp = p1_p * 1000;
-	data_to_send[_cnt++]=BYTE1(_temp);
-	data_to_send[_cnt++]=BYTE0(_temp);
+	bin_data_to_send[_cnt++]=BYTE1(_temp);
+	bin_data_to_send[_cnt++]=BYTE0(_temp);
 	_temp = p1_i  * 1000;
-	data_to_send[_cnt++]=BYTE1(_temp);
-	data_to_send[_cnt++]=BYTE0(_temp);
+	bin_data_to_send[_cnt++]=BYTE1(_temp);
+	bin_data_to_send[_cnt++]=BYTE0(_temp);
 	_temp = p1_d  * 1000;
-	data_to_send[_cnt++]=BYTE1(_temp);
-	data_to_send[_cnt++]=BYTE0(_temp);
+	bin_data_to_send[_cnt++]=BYTE1(_temp);
+	bin_data_to_send[_cnt++]=BYTE0(_temp);
 	_temp = p2_p  * 1000;
-	data_to_send[_cnt++]=BYTE1(_temp);
-	data_to_send[_cnt++]=BYTE0(_temp);
+	bin_data_to_send[_cnt++]=BYTE1(_temp);
+	bin_data_to_send[_cnt++]=BYTE0(_temp);
 	_temp = p2_i  * 1000;
-	data_to_send[_cnt++]=BYTE1(_temp);
-	data_to_send[_cnt++]=BYTE0(_temp);
+	bin_data_to_send[_cnt++]=BYTE1(_temp);
+	bin_data_to_send[_cnt++]=BYTE0(_temp);
 	_temp = p2_d * 1000;
-	data_to_send[_cnt++]=BYTE1(_temp);
-	data_to_send[_cnt++]=BYTE0(_temp);
+	bin_data_to_send[_cnt++]=BYTE1(_temp);
+	bin_data_to_send[_cnt++]=BYTE0(_temp);
 	_temp = p3_p  * 1000;
-	data_to_send[_cnt++]=BYTE1(_temp);
-	data_to_send[_cnt++]=BYTE0(_temp);
+	bin_data_to_send[_cnt++]=BYTE1(_temp);
+	bin_data_to_send[_cnt++]=BYTE0(_temp);
 	_temp = p3_i  * 1000;
-	data_to_send[_cnt++]=BYTE1(_temp);
-	data_to_send[_cnt++]=BYTE0(_temp);
+	bin_data_to_send[_cnt++]=BYTE1(_temp);
+	bin_data_to_send[_cnt++]=BYTE0(_temp);
 	_temp = p3_d * 1000;
-	data_to_send[_cnt++]=BYTE1(_temp);
-	data_to_send[_cnt++]=BYTE0(_temp);
+	bin_data_to_send[_cnt++]=BYTE1(_temp);
+	bin_data_to_send[_cnt++]=BYTE0(_temp);
 	
-	data_to_send[3] = _cnt-4;
+	bin_data_to_send[3] = _cnt-4;
 	
 	sum= 0;
 	for(i=0;i<_cnt;i++)
-		sum += data_to_send[i];
+		sum += bin_data_to_send[i];
 	
-	data_to_send[_cnt++]=sum;
+	bin_data_to_send[_cnt++]=sum;
 
-	BIN_DT_Send_Data(data_to_send, _cnt);
+	BIN_DT_Send_Data(bin_data_to_send, _cnt);
 }
 
 /******************* (C) COPYRIGHT 2014 BIN TECH *****END OF FILE************/

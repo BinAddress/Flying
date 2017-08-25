@@ -212,24 +212,24 @@ void BIN_DT_Data_Receive_Anl(u8 *data_buf,u8 num)
 	
 	if(*(data_buf+2)==0X01) //·É»ú×ËÌ¬
 	{
-		aircraft.rol =	(vs16)(*(data_buf+4)<<8)|*(data_buf+5);
-		aircraft.pit = (vs16)(*(data_buf+6)<<8)|*(data_buf+7);
-		aircraft.yaw = (vs16)(*(data_buf+8)<<8)|*(data_buf+9);
+		aircraft.rol =	(short int)(*(data_buf+4)<<8)|*(data_buf+5);
+		aircraft.pit = (short int)(*(data_buf+6)<<8)|*(data_buf+7);
+		aircraft.yaw = (short int)(*(data_buf+8)<<8)|*(data_buf+9);
 		aircraft.atl = (vs32)(*(data_buf+10)<<24)|(*(data_buf+11)<<16)|(*(data_buf+12)<<8)|(*(data_buf+13));
 	}
 	
 	if(*(data_buf+2)==0X02) //BIN_DT_Send_Senser
 	{
-		mpu9250.accel.x	=	(vs16)(*(data_buf+4)<<8)|*(data_buf+5);
-		mpu9250.accel.y	=	(vs16)(*(data_buf+6)<<8)|*(data_buf+7);
-		mpu9250.accel.z	=	(vs16)(*(data_buf+8)<<8)|*(data_buf+9);
-		mpu9250.gyro.x	=	(vs16)(*(data_buf+10)<<8)|*(data_buf+11);
-		mpu9250.gyro.y	=	(vs16)(*(data_buf+12)<<8)|*(data_buf+13);
-		mpu9250.gyro.z	=	(vs16)(*(data_buf+14)<<8)|*(data_buf+15);
-		mpu9250.mag.x		=	(vs16)(*(data_buf+16)<<8)|*(data_buf+17);
-		mpu9250.mag.y		=	(vs16)(*(data_buf+18)<<8)|*(data_buf+19);
-		mpu9250.mag.z		=	(vs16)(*(data_buf+20)<<8)|*(data_buf+21);
-		mpu9250.temp		=	(vs16)(*(data_buf+21)<<8)|*(data_buf+23);
+		mpu9250.accel.x	=	(short int)(*(data_buf+4)<<8)|*(data_buf+5);
+		mpu9250.accel.y	=	(short int)(*(data_buf+6)<<8)|*(data_buf+7);
+		mpu9250.accel.z	=	(short int)(*(data_buf+8)<<8)|*(data_buf+9);
+		mpu9250.gyro.x	=	(short int)(*(data_buf+10)<<8)|*(data_buf+11);
+		mpu9250.gyro.y	=	(short int)(*(data_buf+12)<<8)|*(data_buf+13);
+		mpu9250.gyro.z	=	(short int)(*(data_buf+14)<<8)|*(data_buf+15);
+		mpu9250.mag.x		=	(short int)(*(data_buf+16)<<8)|*(data_buf+17);
+		mpu9250.mag.y		=	(short int)(*(data_buf+18)<<8)|*(data_buf+19);
+		mpu9250.mag.z		=	(short int)(*(data_buf+20)<<8)|*(data_buf+21);
+		mpu9250.temp		=	(short int)(*(data_buf+21)<<8)|*(data_buf+23);
 	}
 
 	if(*(data_buf+2)==0X10)								//PID1
@@ -327,13 +327,13 @@ void BIN_DT_Send_Status(float angle_rol, float angle_pit, float angle_yaw, s32 a
 	bin_data_to_send[_cnt++]=0x01;
 	bin_data_to_send[_cnt++]=0;
 	
-	_temp = (int)(angle_rol*100);
+	_temp = (int)(angle_rol);
 	bin_data_to_send[_cnt++]=BYTE1(_temp);
 	bin_data_to_send[_cnt++]=BYTE0(_temp);
-	_temp = (int)(angle_pit*100);
+	_temp = (int)(angle_pit);
 	bin_data_to_send[_cnt++]=BYTE1(_temp);
 	bin_data_to_send[_cnt++]=BYTE0(_temp);
-	_temp = (int)(angle_yaw*100);
+	_temp = (int)(angle_yaw);
 	bin_data_to_send[_cnt++]=BYTE1(_temp);
 	bin_data_to_send[_cnt++]=BYTE0(_temp);
 	

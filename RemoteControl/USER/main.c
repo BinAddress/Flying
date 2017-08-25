@@ -29,7 +29,7 @@
 //              RXD		接PA3                             
 //              ----------------------------------------------------------------
 
-//							蓝牙
+//							摇杆
 //              ----------------------------------------------------------------
 //              GND  	电源地
 //              VCC  	3.3v电源
@@ -61,13 +61,12 @@
 
  int main(void)
  {	
-		u8 i;
-		u8 rx_buf[32] = {0};
+		
+		
 		
 		delay_init();	    	 //延时函数初始化	  
 		NVIC_Configuration(); 	 //设置NVIC中断分组2:2位抢占优先级，2位响应优先级 	LED_Init();			     //LED端口初始化
 	 
-
 		oled.Init = OLED_Init;
 		oled.Clear = OLED_Clear;
 		nrf.Init = NRF24L01_Init;
@@ -83,33 +82,17 @@
 		oled.Clear();
 		nrf.Init();
 		while(nrf.Check());
-		nrf.Set_Rx_Mode();
 		hc05.Init(115200);
 		rocker.Init();
 	  
 		TIM3_Int_Init(9,7199);//10Khz的计数频率，计数到10为1ms
-		printf("init ok\r\n");
 
 	while(1) 
 	{				
 			att.pit=rocker.Read(ADC_Channel_10)>>1;
 			att.rol=rocker.Read(ADC_Channel_11)>>1;
 			att.thr=rocker.Read(ADC_Channel_12)>>1;
-			att.yaw=rocker.Read(ADC_Channel_13)>>1;
-
-			
-		if(!NRF24L01_RxPacket(rx_buf))
-		{
-			if(rx_buf[0] == 0xAA && rx_buf[1] == 0xAA)
-			{
-				for(i = 0; i < 32; i++)
-				{
-					BIN_DT_Data_Receive_Prepare(rx_buf[i]);
-					rx_buf[i] = 0;
-				}			
-			}		
-		}
-			
+			att.yaw=rocker.Read(ADC_Channel_13)>>1;		
 	}	  
 	
 }

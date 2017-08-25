@@ -3,22 +3,12 @@
 #include "spi.h"
 #include "usart.h"
 #include "stm32f10x_spi.h"
-//////////////////////////////////////////////////////////////////////////////////	 
-//本程序只供学习使用，未经作者许可，不得用于其它任何用途
-//ALIENTEK战舰STM32开发板
-//NRF24L01驱动代码	   
-//正点原子@ALIENTEK
-//技术论坛:www.openedv.com
-//修改日期:2012/9/13
-//版本：V1.0
-//版权所有，盗版必究。
-//Copyright(C) 广州市星翼电子科技有限公司 2009-2019
-//All rights reserved									  
-//////////////////////////////////////////////////////////////////////////////////
-    
-const u8 TX_ADDRESS[TX_ADR_WIDTH]={0x34,0x43,0x10,0x10,0x01}; //发送地址
-const u8 RX_ADDRESS[RX_ADR_WIDTH]={0x34,0x43,0x10,0x10,0x01};
+#include "stm32f10x_exti.h"
+#include "bin_dt.h"
 
+    
+u8 TX_ADDRESS[TX_ADR_WIDTH]={0x34,0x43,0x10,0x10,0x01}; //发送地址
+u8 RX_ADDRESS[RX_ADR_WIDTH]={0x34,0x43,0x10,0x10,0x01};
 
 //初始化24L01的IO口
 void NRF24L01_Init(void)
@@ -29,7 +19,7 @@ void NRF24L01_Init(void)
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOE|RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOG, ENABLE);	 //使能PB,G端口时钟
     	
 	
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;				 //PB12上拉 防止W25X的干扰
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;				
  	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP; 		 //推挽输出
  	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
  	GPIO_Init(GPIOE, &GPIO_InitStructure);	//初始化指定IO
@@ -39,8 +29,8 @@ void NRF24L01_Init(void)
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1|GPIO_Pin_2;	//PG8 7 推挽 	  
  	GPIO_Init(GPIOE, &GPIO_InitStructure);//初始化指定IO
   
-	GPIO_InitStructure.GPIO_Pin  = GPIO_Pin_3;   
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD; //PG6 输入  
+	GPIO_InitStructure.GPIO_Pin  = GPIO_Pin_3;   //PE3 IRQ
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD; 
 	GPIO_Init(GPIOE, &GPIO_InitStructure);
 
 	GPIO_ResetBits(GPIOE,GPIO_Pin_1|GPIO_Pin_2|GPIO_Pin_3);//PG6,7,8上拉					 
@@ -64,7 +54,35 @@ void NRF24L01_Init(void)
 			 
 	NRF24L01_CE=0; 			//使能24L01
 	NRF24L01_CSN=1;			//SPI片选取消  
-	 		 	 
+	
+    NRF24L01_Write_Reg(NRF_WRITE_REG + SETUP_AW, ADR_WIDTH - 2);          //??????? TX_ADR_WIDTH
+
+    NRF24L01_Write_Reg(NRF_WRITE_REG + RF_CH, CHANAL);                    //??RF???CHANAL
+    NRF24L01_Write_Reg(NRF_WRITE_REG + RF_SETUP, 0x0f);                   //??TX????,0db??,2Mbps,???????
+
+    NRF24L01_Write_Reg(NRF_WRITE_REG + EN_AA, 0x01);                      //????0?????
+
+    NRF24L01_Write_Reg(NRF_WRITE_REG + EN_RXADDR, 0x01);                  //????0?????
+
+
+    NRF24L01_Write_Buf(NRF_WRITE_REG + RX_ADDR_P0, RX_ADDRESS, RX_ADR_WIDTH); //?RX????
+
+    NRF24L01_Write_Reg(NRF_WRITE_REG + RX_PW_P0, RX_PLOAD_WIDTH);         //????0???????
+
+    NRF24L01_Write_Reg(FLUSH_RX, NOP);                                    //??RX FIFO???
+
+    //TX????
+    NRF24L01_Write_Buf(NRF_WRITE_REG + TX_ADDR, TX_ADDRESS, TX_ADR_WIDTH); //?TX????
+
+    NRF24L01_Write_Reg(NRF_WRITE_REG + SETUP_RETR, 0x0F);                 //??????????:250us + 86us;????????:15?
+
+    NRF24L01_Write_Reg(FLUSH_TX, NOP);                                    //??TX FIFO???
+
+    NRF24L01_RX_Mode();                                                  //????????	
+	
+	NRF24L01_CE=1; 			//使能24L01
+	
+	NRF24L01_Int_IRQ_Init(); //IRQ 中断初始化
 }
 //检测24L01是否存在
 //返回值:0，成功;1，失败	
@@ -176,17 +194,47 @@ u8 NRF24L01_RxPacket(u8 *rxbuf)
 //当CE变高后,即进入RX模式,并可以接收数据了		   
 void NRF24L01_RX_Mode(void)
 {
-	NRF24L01_CE=0;	  
-  	NRF24L01_Write_Buf(NRF_WRITE_REG+RX_ADDR_P0,(u8*)RX_ADDRESS,RX_ADR_WIDTH);//写RX节点地址
-	  
-  	NRF24L01_Write_Reg(NRF_WRITE_REG+EN_AA,0x01);    //使能通道0的自动应答    
-  	NRF24L01_Write_Reg(NRF_WRITE_REG+EN_RXADDR,0x01);//使能通道0的接收地址  	 
-  	NRF24L01_Write_Reg(NRF_WRITE_REG+RF_CH,40);	     //设置RF通信频率		  
-  	NRF24L01_Write_Reg(NRF_WRITE_REG+RX_PW_P0,RX_PLOAD_WIDTH);//选择通道0的有效数据宽度 	    
-  	NRF24L01_Write_Reg(NRF_WRITE_REG+RF_SETUP,0x0f);//设置TX发射参数,0db增益,2Mbps,低噪声增益开启   
-  	NRF24L01_Write_Reg(NRF_WRITE_REG+CONFIG, 0x0f);//配置基本工作模式的参数;PWR_UP,EN_CRC,16BIT_CRC,接收模式 
-  	NRF24L01_CE = 1; //CE为高,进入接收模式 
-}						 
+	   NRF24L01_CE=0;
+
+    NRF24L01_Write_Reg(NRF_WRITE_REG + EN_AA, 0x01);          //????0?????
+
+    NRF24L01_Write_Reg(NRF_WRITE_REG + EN_RXADDR, 0x01);      //????0?????
+
+    NRF24L01_Write_Buf(NRF_WRITE_REG + RX_ADDR_P0, RX_ADDRESS, RX_ADR_WIDTH); //?RX????
+
+
+    NRF24L01_Write_Reg(NRF_WRITE_REG + CONFIG, 0x0B | (IS_CRC16 << 2));       //???????????;PWR_UP,EN_CRC,16BIT_CRC,????
+
+    /* ??????*/
+    NRF24L01_Write_Reg(NRF_WRITE_REG + STATUS, 0xff);
+
+    NRF24L01_Write_Reg(FLUSH_RX, NOP);                    //??RX FIFO???
+
+    /*CE??,??????*/
+    NRF24L01_CE=1;
+	
+//	NRF24L01_CE=0;	  
+//  	NRF24L01_Write_Buf(NRF_WRITE_REG+RX_ADDR_P0,(u8*)RX_ADDRESS,RX_ADR_WIDTH);//写RX节点地址
+//	  
+//  	NRF24L01_Write_Reg(NRF_WRITE_REG+EN_AA,0x01);    //使能通道0的自动应答    
+//  	NRF24L01_Write_Reg(NRF_WRITE_REG+EN_RXADDR,0x01);//使能通道0的接收地址 
+//	
+//  	NRF24L01_Write_Reg(NRF_WRITE_REG+RF_CH,40);	     //设置RF通信频率		  
+//  	NRF24L01_Write_Reg(NRF_WRITE_REG+RX_PW_P0,RX_PLOAD_WIDTH);//选择通道0的有效数据宽度 	
+//	
+//  	
+//	
+////  	NRF24L01_Write_Reg(NRF_WRITE_REG+CONFIG, 0x0f);//配置基本工作模式的参数;PWR_UP,EN_CRC,16BIT_CRC,接收模式 
+////		NRF24L01_Write_Reg(NRF_WRITE_REG+RF_SETUP,0x0f);//设置TX发射参数,0db增益,2Mbps,低噪声增益开启   
+//	
+//	
+//		NRF24L01_Write_Reg(NRF_WRITE_REG + CONFIG, 0x0f);       
+//		NRF24L01_Write_Reg(NRF_WRITE_REG+RF_SETUP,0xff);//设置TX发射参数,0db增益,2Mbps,低噪声增益开启   
+//		NRF24L01_Write_Reg(FLUSH_RX, NOP);
+//	
+//  	NRF24L01_CE = 1; //CE为高,进入接收模式 
+}					
+
 //该函数初始化NRF24L01到TX模式
 //设置TX地址,写TX数据宽度,设置RX自动应答的地址,填充TX发送数据,选择RF频道,波特率和LNA HCURR
 //PWR_UP,CRC使能
@@ -194,17 +242,81 @@ void NRF24L01_RX_Mode(void)
 //CE为高大于10us,则启动发送.	 
 void NRF24L01_TX_Mode(void)
 {														 
-	NRF24L01_CE=0;	    
-  	NRF24L01_Write_Buf(NRF_WRITE_REG+TX_ADDR,(u8*)TX_ADDRESS,TX_ADR_WIDTH);//写TX节点地址 
-  	NRF24L01_Write_Buf(NRF_WRITE_REG+RX_ADDR_P0,(u8*)RX_ADDRESS,RX_ADR_WIDTH); //设置TX节点地址,主要为了使能ACK	  
+//	NRF24L01_CE=0;	    
+//  	NRF24L01_Write_Buf(NRF_WRITE_REG+TX_ADDR,(u8*)TX_ADDRESS,TX_ADR_WIDTH);//写TX节点地址 
+//  	NRF24L01_Write_Buf(NRF_WRITE_REG+RX_ADDR_P0,(u8*)RX_ADDRESS,RX_ADR_WIDTH); //设置TX节点地址,主要为了使能ACK	  
 
-  	NRF24L01_Write_Reg(NRF_WRITE_REG+EN_AA,0x01);     //使能通道0的自动应答    
-  	NRF24L01_Write_Reg(NRF_WRITE_REG+EN_RXADDR,0x01); //使能通道0的接收地址  
-  	NRF24L01_Write_Reg(NRF_WRITE_REG+SETUP_RETR,0x1a);//设置自动重发间隔时间:500us + 86us;最大自动重发次数:10次
-  	NRF24L01_Write_Reg(NRF_WRITE_REG+RF_CH,40);       //设置RF通道为40
-  	NRF24L01_Write_Reg(NRF_WRITE_REG+RF_SETUP,0x0f);  //设置TX发射参数,0db增益,2Mbps,低噪声增益开启   
-  	NRF24L01_Write_Reg(NRF_WRITE_REG+CONFIG,0x0e);    //配置基本工作模式的参数;PWR_UP,EN_CRC,16BIT_CRC,接收模式,开启所有中断
-	NRF24L01_CE=1;//CE为高,10us后启动发送
+//  	NRF24L01_Write_Reg(NRF_WRITE_REG+EN_AA,0x01);     //使能通道0的自动应答    
+//  	NRF24L01_Write_Reg(NRF_WRITE_REG+EN_RXADDR,0x01); //使能通道0的接收地址  
+//  	NRF24L01_Write_Reg(NRF_WRITE_REG+SETUP_RETR,0x1a);//设置自动重发间隔时间:500us + 86us;最大自动重发次数:10次
+//  	NRF24L01_Write_Reg(NRF_WRITE_REG+RF_CH,40);       //设置RF通道为40
+//  	NRF24L01_Write_Reg(NRF_WRITE_REG+RF_SETUP,0x0f);  //设置TX发射参数,0db增益,2Mbps,低噪声增益开启   
+//  	NRF24L01_Write_Reg(NRF_WRITE_REG+CONFIG,0x0e);    //配置基本工作模式的参数;PWR_UP,EN_CRC,16BIT_CRC,接收模式,开启所有中断
+//		
+//		NRF24L01_CE=1;//CE为高,10us后启动发送
+	
+    NRF24L01_CE=0;
+    //DELAY_MS(1);
+
+    NRF24L01_Write_Buf(NRF_WRITE_REG + TX_ADDR, TX_ADDRESS, TX_ADR_WIDTH); //?TX????
+
+    NRF24L01_Write_Buf(NRF_WRITE_REG + RX_ADDR_P0, RX_ADDRESS, RX_ADR_WIDTH); //??RX???? ,??????ACK
+
+    NRF24L01_Write_Reg(NRF_WRITE_REG + CONFIG, 0x0A | (IS_CRC16 << 2)); //???????????;PWR_UP,EN_CRC,16BIT_CRC,????,??????
+
+
+    /*CE??,??????*/
+    NRF24L01_CE=1;
+		
+}
+
+void NRF24L01_Int_IRQ_Init(void)
+{
+ 	EXTI_InitTypeDef EXTI_InitStructure;
+ 	NVIC_InitTypeDef NVIC_InitStructure;
+	
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO,ENABLE);	//使能复用功能时钟
+	
+	GPIO_EXTILineConfig(GPIO_PortSourceGPIOE,GPIO_PinSource3);
+	
+	EXTI_InitStructure.EXTI_Line=EXTI_Line3;	//PE3
+	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;	
+	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling; //下降沿触发
+	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+	EXTI_Init(&EXTI_InitStructure);	 	//根据EXTI_InitStruct中指定的参数初始化外设EXTI寄存器	
+
+	NVIC_InitStructure.NVIC_IRQChannel = EXTI3_IRQn;			
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x02;	//抢占优先级2 
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x01;					//子优先级1 
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;								//使能外部中断通道
+	NVIC_Init(&NVIC_InitStructure);  	  //根据NVIC_InitStruct中指定的参数初始化外设NVIC寄存器
+}
+
+u8 nrf_rx_buf[32] = {0};
+
+//外部中断3服务程序
+void EXTI3_IRQHandler(void)
+{
+	u8 i;
+
+
+	NRF24L01_CE=0;
+	
+		if(!NRF24L01_RxPacket(nrf_rx_buf))
+		{
+			if(nrf_rx_buf[0] == 0xAA && nrf_rx_buf[1] == 0xAA)
+			{
+				for(i = 0; i < 32; i++)
+				{
+					BIN_DT_Data_Receive_Prepare(nrf_rx_buf[i]);
+					nrf_rx_buf[i] = 0;
+				}			
+			}		
+		}
+		NRF24L01_CE=1;
+		
+
+	EXTI_ClearITPendingBit(EXTI_Line3);  //清除LINE3上的中断标志位  
 }
 
 
