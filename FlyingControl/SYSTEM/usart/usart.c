@@ -45,10 +45,9 @@ struct __FILE
 
 FILE __stdout;       
 //定义_sys_exit()以避免使用半主机模式    
-int _sys_exit(int x) 
+void _sys_exit(int x) 
 { 
 	x = x; 
-	return 0;
 } 
 //重定义fputc函数 
 int fputc(int ch, FILE *f)
@@ -59,23 +58,7 @@ int fputc(int ch, FILE *f)
 }
 #endif 
 
-/*使用microLib的方法*/
- /* 
-int fputc(int ch, FILE *f)
-{
-	USART_SendData(USART1, (uint8_t) ch);
-
-	while (USART_GetFlagStatus(USART1, USART_FLAG_TC) == RESET) {}	
-   
-    return ch;
-}
-int GetKey (void)  { 
-
-    while (!(USART1->SR & USART_FLAG_RXNE));
-
-    return ((int)(USART1->DR & 0x1FF));
-}
-*/
+ 
  
 #if EN_USART1_RX   //如果使能了接收
 //串口1中断服务程序
@@ -137,33 +120,13 @@ void USART1_IRQHandler(void)                	//串口1中断服务程序
 	if(USART_GetITStatus(USART1, USART_IT_RXNE) != RESET)  //接收中断(接收到的数据必须是0x0d 0x0a结尾)
 		{
 		Res =USART_ReceiveData(USART1);	//读取接收到的数据
-//		ANO_DT_Data_Receive_Prepare(Res);
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
+		
 		if((USART_RX_STA&0x8000)==0)//接收未完成
 			{
 			if(USART_RX_STA&0x4000)//接收到了0x0d
 				{
 				if(Res!=0x0a)USART_RX_STA=0;//接收错误,重新开始
 				else USART_RX_STA|=0x8000;	//接收完成了 
-					
-					
-					
 				}
 			else //还没收到0X0D
 				{	
