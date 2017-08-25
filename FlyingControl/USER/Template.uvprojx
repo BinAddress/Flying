@@ -474,6 +474,11 @@
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\BIN_DT.c</FilePath>
             </File>
+            <File>
+              <FileName>ano_dt.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\ano_dt.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

@@ -59,6 +59,7 @@
 #include "bin_dt.h"
 #include "menu.h"
 #include "key.h"
+#include "display.h"
 
 
  int main(void)
@@ -69,6 +70,8 @@
 	 
 		oled.Init = OLED_Init;
 		oled.Clear = OLED_Clear;
+	  oled.English = OLED_ShowString;
+		oled.Char = OLED_ShowChar;
 		nrf.Init = NRF24L01_Init;
 		nrf.Check = NRF24L01_Check;
 		nrf.Set_Rx_Mode = NRF24L01_RX_Mode;	 
@@ -78,8 +81,7 @@
 		rocker.Init = Adc_Init;
 		rocker.Read = Get_Adc;
 		display.Init = Display_Init;
-		
-		
+	 
 		oled.Init();
 		oled.Clear();
 		nrf.Init();
@@ -88,7 +90,6 @@
 		rocker.Init();
 		display.Init();
 
-	  
 		TIM3_Int_Init(9,7199);//10Khz的计数频率，计数到10为1ms
 
 	while(1) 
@@ -99,6 +100,7 @@
 			att.yaw=rocker.Read(ADC_Channel_13)>>1;	
 			
 			Display();
+			Key_Fun();
 	}	  
 	
 }

@@ -1,97 +1,10 @@
 #include "key.h"
 #include "menu.h"
 #include "sys.h"
+#include "adc.h"
+#include "stm32f10x_adc.h"
+#include "delay.h"
 
-void Kye1_Fun(void);
-void Kye2_Fun(void);
-void Kye3_Fun(void);
-void Kye4_Fun(void);
-void Kye5_Fun(void);
-
-void Key_Up_Show0(void);
-void Key_Up_Show1(void);
-void Key_Up_Show2(void);
-void Key_Up_Show3(void);
-void Key_Up_Show4(void);
-void Key_Up_Show5(void);
-void Key_Up_Show6(void);
-void Key_Up_Show7(void);
-void Key_Up_Show8(void);
-void Key_Up_Show9(void);
-void Key_Up_Show10(void);
-void Key_Up_Show11(void);
-void Key_Up_Show12(void);
-void Key_Up_Show13(void);
-void Key_Up_Show14(void);
-void Key_Up_Show15(void);
-
-void Key_DOWN_Show0(void);
-void Key_DOWN_Show1(void);
-void Key_DOWN_Show2(void);
-void Key_DOWN_Show3(void);
-void Key_DOWN_Show4(void);
-void Key_DOWN_Show5(void);
-void Key_DOWN_Show6(void);
-void Key_DOWN_Show7(void);
-void Key_DOWN_Show8(void);
-void Key_DOWN_Show9(void);
-void Key_DOWN_Show10(void);
-void Key_DOWN_Show11(void);
-void Key_DOWN_Show12(void);
-void Key_DOWN_Show13(void);
-void Key_DOWN_Show14(void);
-void Key_DOWN_Show15(void);
-
-void Key_LIFT_Show0(void);
-void Key_LIFT_Show1(void);
-void Key_LIFT_Show2(void);
-void Key_LIFT_Show3(void);
-void Key_LIFT_Show4(void);
-void Key_LIFT_Show5(void);
-void Key_LIFT_Show6(void);
-void Key_LIFT_Show7(void);
-void Key_LIFT_Show8(void);
-void Key_LIFT_Show9(void);
-void Key_LIFT_Show10(void);
-void Key_LIFT_Show11(void);
-void Key_LIFT_Show12(void);
-void Key_LIFT_Show13(void);
-void Key_LIFT_Show14(void);
-void Key_LIFT_Show15(void);
-
-void Key_RIGHT_Show0(void);
-void Key_RIGHT_Show1(void);
-void Key_RIGHT_Show2(void);
-void Key_RIGHT_Show3(void);
-void Key_RIGHT_Show4(void);
-void Key_RIGHT_Show5(void);
-void Key_RIGHT_Show6(void);
-void Key_RIGHT_Show7(void);
-void Key_RIGHT_Show8(void);
-void Key_RIGHT_Show9(void);
-void Key_RIGHT_Show10(void);
-void Key_RIGHT_Show11(void);
-void Key_RIGHT_Show12(void);
-void Key_RIGHT_Show13(void);
-void Key_RIGHT_Show14(void);
-void Key_RIGHT_Show15(void);
-
-void Key_CENTRE_Show0(void);
-void Key_CENTRE_Show1(void);
-void Key_CENTRE_Show2(void);
-void Key_CENTRE_Show3(void);
-void Key_CENTRE_Show4(void);
-void Key_CENTRE_Show5(void);
-void Key_CENTRE_Show6(void);
-void Key_CENTRE_Show7(void);
-void Key_CENTRE_Show8(void);
-void Key_CENTRE_Show9(void);
-void Key_CENTRE_Show10(void);
-void Key_CENTRE_Show11(void);
-void Key_CENTRE_Show12(void);
-void Key_CENTRE_Show13(void);
-void Key_CENTRE_Show14(void);
-void Key_CENTRE_Show15(void);
 
 
 void Key_Init(void)
@@ -110,3 +23,40 @@ char Key_Read(void)
 	return PDin(15);
 }
 
+char Adc_R_Down_Key_Read(void)
+{	
+	if(Get_Adc(ADC_Channel_13) > 2700)
+	{
+		delay_ms(10);
+		while(Get_Adc(ADC_Channel_13) > 2700);
+		return 1;
+	}
+	return 0;
+}
+
+char Adc_R_Up_Key_Read(void)
+{	
+	if(Get_Adc(ADC_Channel_13) < 1600)
+	{
+		delay_ms(10);
+		while(Get_Adc(ADC_Channel_13) < 1600);
+		return 1;
+	}
+	return 0;
+}
+
+//按键读取  去抖
+//返回值：按下返回 1 ，否则返回 0 
+char Read_Key_Q(void)
+{
+    if(Key_Read() == 0)
+    {
+        delay_ms(10);
+        if(Key_Read() == 0)
+        {
+            while(Key_Read() == 0);
+            return 1;
+        }
+    }
+    return 0;
+}

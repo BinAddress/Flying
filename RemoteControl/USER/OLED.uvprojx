@@ -335,7 +335,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F10X_HD,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\HARDWARE\LED;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\USER;..\STM32F10x_FWLib\inc;..\CORE;..\HARDWARE\KEY;..\HARDWARE\OLED;..\HARDWARE\SPI;..\HARDWARE\NRF24L01;..\HARDWARE\ADC;..\HARDWARE\TIMER;..\SYSTEM\bin_dt;..\SYSTEM\ano</IncludePath>
+              <IncludePath>..\HARDWARE\LED;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\USER;..\STM32F10x_FWLib\inc;..\CORE;..\HARDWARE\KEY;..\HARDWARE\OLED;..\HARDWARE\SPI;..\HARDWARE\NRF24L01;..\HARDWARE\ADC;..\HARDWARE\TIMER;..\SYSTEM\bin_dt;..\SYSTEM\ano;..\HARDWARE\DISPLAY</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -418,6 +418,21 @@
               <FileName>timer.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\TIMER\timer.c</FilePath>
+            </File>
+            <File>
+              <FileName>arch.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\DISPLAY\arch.c</FilePath>
+            </File>
+            <File>
+              <FileName>Key.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\DISPLAY\Key.c</FilePath>
+            </File>
+            <File>
+              <FileName>menu.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\DISPLAY\menu.c</FilePath>
             </File>
           </Files>
         </Group>

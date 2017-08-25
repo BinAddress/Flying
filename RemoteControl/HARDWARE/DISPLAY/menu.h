@@ -2,7 +2,7 @@
 #define __USER_MENU_H__
 
 #define DISPLAY_NUMBER  5 //界面总数
-#define KEY_NUMBER	1 //按键个数
+#define KEY_NUMBER	3 //按键个数
 
 struct class_key{
 void (*Init)(void);					//初始化
@@ -17,18 +17,18 @@ void (*Init)(void);	//界面初始化
 void (*Show)(void); //界面循环显示
 };
 
-typedef struct class_display{
+struct class_display{
 char 	show;									//当前显示界面
 char  flag;									//当前界面是否刷新
 void (*Init)(void);					//初始化
 void (*Clear)(void);				//清屏函数
 struct class_menu menu[DISPLAY_NUMBER]; //界面函数
 struct class_key key[KEY_NUMBER];				//按键控制函数
-}class_display;
+};
 
-static class_display display;
+extern struct class_display display;
 
 void Display(void);
-void Display_Init(void);
+void Key_Fun(void);
 
 #endif

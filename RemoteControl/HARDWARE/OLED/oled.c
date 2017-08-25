@@ -125,9 +125,9 @@ void OLED_Clear(void)
 //y:0~63
 //mode:0,反白显示;1,正常显示				 
 //size:选择字体 16/12 
-void OLED_ShowChar(u8 x,u8 y,u8 chr)
+void OLED_ShowChar(u8 x,u8 y,char chr)
 {      	
-	unsigned char c=0,i=0;	
+		unsigned char c=0,i=0;	
 		c=chr-' ';//得到偏移后的值			
 		if(x>Max_Column-1){x=0;y=y+2;}
 		if(SIZE ==16)
@@ -146,6 +146,8 @@ void OLED_ShowChar(u8 x,u8 y,u8 chr)
 				
 			}
 }
+
+
 //m^n函数
 u32 oled_pow(u8 m,u8 n)
 {
@@ -179,7 +181,7 @@ void OLED_ShowNum(u8 x,u8 y,u32 num,u8 len,u8 size)
 	}
 } 
 //显示一个字符号串
-void OLED_ShowString(u8 x,u8 y,u8 *chr)
+void OLED_ShowString(u8 x,u8 y,char *chr)
 {
 	unsigned char j=0;
 	while (chr[j]!='\0')
@@ -189,6 +191,7 @@ void OLED_ShowString(u8 x,u8 y,u8 *chr)
 			j++;
 	}
 }
+
 //显示汉字
 void OLED_ShowCHinese(u8 x,u8 y,u8 no)
 {      			    
