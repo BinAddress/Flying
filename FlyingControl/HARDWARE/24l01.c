@@ -16,8 +16,8 @@
 //All rights reserved									  
 //////////////////////////////////////////////////////////////////////////////////
     
-const u8 TX_ADDRESS[TX_ADR_WIDTH]={0x34,0x43,0x10,0x10,0x01}; //发送地址
-const u8 RX_ADDRESS[RX_ADR_WIDTH]={0x34,0x43,0x10,0x10,0x01};
+u8 TX_ADDRESS[TX_ADR_WIDTH]={0x34,0x45,0x17,0x10,0x01}; //发送地址
+u8 RX_ADDRESS[RX_ADR_WIDTH]={0x34,0x45,0x17,0x10,0x01};
 
 
 //初始化24L01的IO口

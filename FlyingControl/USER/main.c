@@ -65,12 +65,11 @@ int main(void)
 					aircraft.rol = (short int)(roll*100);
 					aircraft.yaw = (short int)(yaw*100);
 			
-					//ANO_DT_Data_Exchange();
 					BIN_DT_Data_Exchange();
-
 			}
 			
-			BIN_DT_Data_Exchange();
-
+			
+			
+			
 	  }
 }

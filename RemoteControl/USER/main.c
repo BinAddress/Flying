@@ -57,12 +57,12 @@
 #include "ano_dt.h"
 #include "timer.h"
 #include "bin_dt.h"
+#include "menu.h"
+#include "key.h"
 
 
  int main(void)
  {	
-		
-		
 		
 		delay_init();	    	 //延时函数初始化	  
 		NVIC_Configuration(); 	 //设置NVIC中断分组2:2位抢占优先级，2位响应优先级 	LED_Init();			     //LED端口初始化
@@ -77,6 +77,8 @@
 		hc05.PutStrint = printf;
 		rocker.Init = Adc_Init;
 		rocker.Read = Get_Adc;
+		display.Init = Display_Init;
+		
 		
 		oled.Init();
 		oled.Clear();
@@ -84,6 +86,8 @@
 		while(nrf.Check());
 		hc05.Init(115200);
 		rocker.Init();
+		display.Init();
+
 	  
 		TIM3_Int_Init(9,7199);//10Khz的计数频率，计数到10为1ms
 
@@ -92,7 +96,9 @@
 			att.pit=rocker.Read(ADC_Channel_10)>>1;
 			att.rol=rocker.Read(ADC_Channel_11)>>1;
 			att.thr=rocker.Read(ADC_Channel_12)>>1;
-			att.yaw=rocker.Read(ADC_Channel_13)>>1;		
+			att.yaw=rocker.Read(ADC_Channel_13)>>1;	
+			
+			Display();
 	}	  
 	
 }
