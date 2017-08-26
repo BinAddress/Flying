@@ -143,7 +143,6 @@ void OLED_ShowChar(u8 x,u8 y,char chr)
 				OLED_Set_Pos(x,y+1);
 				for(i=0;i<6;i++)
 				OLED_WR_Byte(F6x8[c][i],OLED_DATA);
-				
 			}
 }
 
@@ -174,7 +173,7 @@ void OLED_ShowNum(u8 x,u8 y,u32 num,u8 len,u8 size)
 			{
 				OLED_ShowChar(x+(size/2)*t,y,' ');
 				continue;
-			}else enshow=1; 
+			}else enshow=1;
 		 	 
 		}
 	 	OLED_ShowChar(x+(size/2)*t,y,temp+'0'); 

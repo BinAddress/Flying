@@ -6,9 +6,12 @@
 #include "adc.h"
 #include "ano_dt.h"
 
+
+	
 void float_to_char(char *ch , float data); 
 void uint_to_char(char *ch, unsigned int data);
 void LCD_Dispaly_String(unsigned int x, unsigned int y,  char *str);
+
 
 void main_menu(void) //Ö÷²Ëµ¥
 {
@@ -70,20 +73,36 @@ void flying_menu_init(void)
 
 void flying_menu(void)
 {
-	OLED_ShowNum(32,0,(short int)(aircraft.pit/100),3,16);
-	OLED_ShowNum(32,2,(short int)(aircraft.rol/100),3,16);
-	OLED_ShowNum(32,4,(short int)(aircraft.yaw/100),3,16);
-	OLED_ShowNum(32,6,(short int)(aircraft.atl/100),3,16);
+		short int dis_pit = 0;
+		short int dis_rol = 0;
+		short int dis_yaw = 0;
+		short int dis_atl = 0;
+
+		dis_pit = (short int)(aircraft.pit/100);
+		dis_rol = (short int)(aircraft.rol/100);
+		dis_yaw = (short int)(aircraft.yaw/100);
+		dis_atl = (short int)(aircraft.atl/100);
+
+		OLED_ShowNum(32,0,(u16)dis_pit,3,16);
+		OLED_ShowNum(32,2,(u16)dis_rol,3,16);
+		OLED_ShowNum(32,4,(u16)dis_yaw,3,16);
+		OLED_ShowNum(32,6,(u16)dis_atl,3,16);	
 }
 
 void remote_menu_init(void)
 {
-
+	LCD_Dispaly_String(0,0,"AD1:");
+	LCD_Dispaly_String(0,2,"AD2:");
+	LCD_Dispaly_String(0,4,"AD3:");
+	LCD_Dispaly_String(0,6,"AD4:");
 }
 
 void remote_menu(void)
 {
-
+	OLED_ShowNum(32,0,att.pit,4,16);
+	OLED_ShowNum(32,2,att.rol,4,16);
+	OLED_ShowNum(32,4,att.thr,4,16);
+	OLED_ShowNum(32,6,att.yaw,4,16);	
 }
 
 void pid_menu_init(void)
