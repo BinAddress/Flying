@@ -1,6 +1,7 @@
 #include "timer.h"
 #include "stm32f10x_tim.h"
 #include "ano_dt.h"
+#include "bin_dt.h"
 
 //////////////////////////////////////////////////////////////////////////////////	 
 //本程序只供学习使用，未经作者许可，不得用于其它任何用途
@@ -53,6 +54,7 @@ void TIM3_IRQHandler(void)   //TIM3中断
 		{
 		TIM_ClearITPendingBit(TIM3, TIM_IT_Update  );  //清除TIMx更新中断标志 
 		ANO_DT_Data_Exchange();	
+		BIN_DT_Data_Exchange();
 		}
 }
 

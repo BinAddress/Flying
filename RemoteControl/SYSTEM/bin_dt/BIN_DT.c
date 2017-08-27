@@ -47,7 +47,7 @@ void BIN_DT_Data_Exchange(void)
 	if(bin_f.send_version)
 	{
 		bin_f.send_version = 0;
-		BIN_DT_Send_Version(4,300,100,400,0);
+//		BIN_DT_Send_Version(4,300,100,400,0);
 	}
 /////////////////////////////////////////////////////////////////////////////////////
 	else if(bin_f.send_status)
@@ -67,7 +67,7 @@ void BIN_DT_Data_Exchange(void)
 	else if(bin_f.send_rcdata)
 	{
 		bin_f.send_rcdata = 0;
-//		BIN_DT_Send_RCData(att.thr,att.yaw,att.rol,att.pit,aux[0],aux[1],aux[2],aux[3],aux[4],aux[5]);
+		BIN_DT_Send_RCData(att.thr,att.yaw,att.rol,att.pit,0,0,0,0,0,0);
 	}	
 /////////////////////////////////////////////////////////////////////////////////////	
 	else if(bin_f.send_motopwm)
@@ -79,7 +79,7 @@ void BIN_DT_Data_Exchange(void)
 	else if(bin_f.send_power)
 	{
 		bin_f.send_power = 0;
-		BIN_DT_Send_Power(123,456);
+//		BIN_DT_Send_Power(123,456);
 	}
 /////////////////////////////////////////////////////////////////////////////////////
 	else if(bin_f.send_pid1)
@@ -118,16 +118,25 @@ void BIN_DT_Data_Exchange(void)
 //移植时，用户应根据自身应用的情况，根据使用的通信方式，实现此函数
 void BIN_DT_Send_Data(u8 *dataToSend , u8 length)
 {	
-//		u8 i = 0;
-//		nrf.Set_Tx_Mode();
-//		for(i = 0; i < 5; i++)
-//		{
-//			if(NRF24L01_TxPacket_len(dataToSend,length) == TX_OK)
-//			{
-//				break;
-//			}
-//		}
-//		nrf.Set_Rx_Mode();	
+		u8 i = 0;
+	
+		bin_data_to_send[length+1] = 0;
+		if(length < 31)
+		{
+			NRF24L01_TX_Mode();
+			for(i = 0; i < 5; i++)
+			{
+				if(NRF24L01_TxPacket(dataToSend) == TX_OK)
+				{
+					break;
+				}
+			}
+			NRF24L01_RX_Mode();			
+		}
+		else
+		{
+			i = 0;
+		}
 }
 
 static void BIN_DT_Send_Check(u8 head, u8 check_sum)
@@ -218,7 +227,7 @@ void BIN_DT_Data_Receive_Anl(u8 *data_buf,u8 num)
 		aircraft.atl = (vs32)(*(data_buf+10)<<24)|(*(data_buf+11)<<16)|(*(data_buf+12)<<8)|(*(data_buf+13));
 	}
 	
-	if(*(data_buf+2)==0X02) //BIN_DT_Send_Senser
+	if(*(data_buf+2)==0X02) //加速度角速度
 	{
 		mpu9250.accel.x	=	(short int)(*(data_buf+4)<<8)|*(data_buf+5);
 		mpu9250.accel.y	=	(short int)(*(data_buf+6)<<8)|*(data_buf+7);
@@ -230,6 +239,16 @@ void BIN_DT_Data_Receive_Anl(u8 *data_buf,u8 num)
 		mpu9250.mag.y		=	(short int)(*(data_buf+18)<<8)|*(data_buf+19);
 		mpu9250.mag.z		=	(short int)(*(data_buf+20)<<8)|*(data_buf+21);
 		mpu9250.temp		=	(short int)(*(data_buf+21)<<8)|*(data_buf+23);
+	}
+	
+	if(*(data_buf+2)==0X06) //加速度角速度
+	{
+		motor.PWM_1	=	(short int)(*(data_buf+4)<<8)|*(data_buf+5);
+		motor.PWM_2	=	(short int)(*(data_buf+6)<<8)|*(data_buf+7);
+		motor.PWM_3	=	(short int)(*(data_buf+8)<<8)|*(data_buf+9);
+		motor.PWM_4	=	(short int)(*(data_buf+10)<<8)|*(data_buf+11);
+		motor.PWM_5	=	(short int)(*(data_buf+12)<<8)|*(data_buf+13);
+		motor.PWM_6	=	(short int)(*(data_buf+14)<<8)|*(data_buf+15);
 	}
 
 	if(*(data_buf+2)==0X10)								//PID1
@@ -409,7 +428,7 @@ void BIN_DT_Send_RCData(u16 thr,u16 yaw,u16 rol,u16 pit,u16 aux1,u16 aux2,u16 au
 	u8 _cnt=0;
 	u8 i,sum;
 	bin_data_to_send[_cnt++]=0xAA;
-	bin_data_to_send[_cnt++]=0xAA;
+	bin_data_to_send[_cnt++]=0xAF;
 	bin_data_to_send[_cnt++]=0x03;
 	bin_data_to_send[_cnt++]=0;
 	bin_data_to_send[_cnt++]=BYTE1(thr);

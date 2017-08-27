@@ -21,7 +21,6 @@
 
 dt_flag_t f;					//需要发送数据的标志
 u8 data_to_send[50];	//发送数据缓存
-u16 aux[6] = {0};
 struct class_attitude att = {0};	//遥控器控制信息
 struct class_motor motor= {0};	//电机转速
 struct class_aircraft aircraft = {0};	//飞机状态
@@ -78,13 +77,13 @@ void ANO_DT_Data_Exchange(void)
 	else if(f.send_rcdata)
 	{
 		f.send_rcdata = 0;
-		ANO_DT_Send_RCData(att.thr,att.yaw,att.rol,att.pit,aux[0],aux[1],aux[2],aux[3],aux[4],aux[5]);
+		ANO_DT_Send_RCData(att.thr,att.yaw,att.rol,att.pit,0,0,0,0,0,0);
 	}	
 /////////////////////////////////////////////////////////////////////////////////////	
 	else if(f.send_motopwm)
 	{
 		f.send_motopwm = 0;
-		ANO_DT_Send_MotoPWM(motor.PWM_1,motor.PWM_2,motor.PWM_3,motor.PWM_4,5,6,7,8);
+		ANO_DT_Send_MotoPWM(motor.PWM_1,motor.PWM_2,motor.PWM_3,motor.PWM_4,motor.PWM_5,motor.PWM_6,7,8);
 	}	
 /////////////////////////////////////////////////////////////////////////////////////
 	else if(f.send_power)
@@ -503,6 +502,13 @@ void ANO_DT_Send_MotoPWM(u16 m_1,u16 m_2,u16 m_3,u16 m_4,u16 m_5,u16 m_6,u16 m_7
 	data_to_send[_cnt++]=0xAA;
 	data_to_send[_cnt++]=0x06;
 	data_to_send[_cnt++]=0;
+	
+	m_1 = m_1/10;
+	m_2 = m_2/10;
+	m_3 = m_3/10;
+	m_4 = m_4/10;
+	m_5 = m_5/10;
+	m_6 = m_6/10;
 	
 	data_to_send[_cnt++]=BYTE1(m_1);
 	data_to_send[_cnt++]=BYTE0(m_1);

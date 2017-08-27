@@ -2958,11 +2958,11 @@ static int setup_compass(void)
             break;
     }
 
-    if (akm_addr > 0x0F) {
-        /* TODO: Handle this case in all compass-related functions. */
-        log_e("Compass not found.\n");
-        return -1;
-    }
+//    if (akm_addr > 0x0F) {
+//        /* TODO: Handle this case in all compass-related functions. */
+//        log_e("Compass not found.\n");
+//        return -1;
+//    }
 
     st.chip_cfg.compass_addr = akm_addr;
 

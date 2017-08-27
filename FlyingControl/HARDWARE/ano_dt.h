@@ -43,10 +43,12 @@ u8 armed;
 
 struct class_motor	//电机转速
 {
-u16 PWM_1;
-u16 PWM_2;
-u16 PWM_3;
-u16 PWM_4;
+uint16_t PWM_1;
+uint16_t PWM_2;
+uint16_t PWM_3;
+uint16_t PWM_4;
+uint16_t PWM_5;
+uint16_t PWM_6;
 }; 
 
 extern struct class_attitude att;

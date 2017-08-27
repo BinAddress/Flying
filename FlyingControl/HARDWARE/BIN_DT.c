@@ -3,6 +3,7 @@
 #include "mpu9250.h"
 #include "24l01.h"
 #include "ano_dt.h"
+#include "delay.h"
 
 /////////////////////////////////////////////////////////////////////////////////////
 //数据拆分宏定义，在发送大于1字节的数据类型时，比如int16、float等，需要把数据拆分成单独字节进行发送
@@ -78,7 +79,7 @@ void BIN_DT_Data_Exchange(void)
 	else if(bin_f.send_motopwm)
 	{
 		bin_f.send_motopwm = 0;
-		BIN_DT_Send_MotoPWM(motor.PWM_1,motor.PWM_2,motor.PWM_3,motor.PWM_4,5,6,7,8);
+		BIN_DT_Send_MotoPWM(motor.PWM_1,motor.PWM_2,motor.PWM_3,motor.PWM_4,motor.PWM_5,motor.PWM_6,7,8);
 	}	
 /////////////////////////////////////////////////////////////////////////////////////
 	else if(bin_f.send_power)
@@ -508,7 +509,7 @@ void BIN_DT_Send_MotoPWM(u16 m_1,u16 m_2,u16 m_3,u16 m_4,u16 m_5,u16 m_6,u16 m_7
 	bin_data_to_send[_cnt++]=0xAA;
 	bin_data_to_send[_cnt++]=0x06;
 	bin_data_to_send[_cnt++]=0;
-	
+		
 	bin_data_to_send[_cnt++]=BYTE1(m_1);
 	bin_data_to_send[_cnt++]=BYTE0(m_1);
 	bin_data_to_send[_cnt++]=BYTE1(m_2);

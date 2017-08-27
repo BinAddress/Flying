@@ -47,6 +47,8 @@ u16 PWM_1;
 u16 PWM_2;
 u16 PWM_3;
 u16 PWM_4;
+u16 PWM_5;
+u16 PWM_6;
 }; 
 
 extern struct class_attitude att;
