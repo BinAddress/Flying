@@ -132,12 +132,12 @@ void ANO_DT_Data_Exchange(void)
 void ANO_DT_Send_Data(u8 *dataToSend , u8 length)
 {
 
-	while(length--)
-	{
-		while((USART1->SR&0X40)==0);
-		USART1->DR = *dataToSend;  
-		dataToSend++;
-	}
+//	while(length--)
+//	{
+//		while((USART1->SR&0X40)==0);
+//		USART1->DR = *dataToSend;  
+//		dataToSend++;
+//	}
 
 }
 
@@ -257,6 +257,14 @@ void ANO_DT_Data_Receive_Anl(u8 *data_buf,u8 num)
 		}
 	}
 
+	if(*(data_buf+2)==0X03) //Ò£¿ØÆ÷Êý¾Ý
+	{
+        att.thr  = ( (u16)(*(data_buf+4)<<8)|*(data_buf+5) );
+        att.yaw  = ( (u16)(*(data_buf+6)<<8)|*(data_buf+7) );
+        att.rol  = ( (u16)(*(data_buf+8)<<8)|*(data_buf+9) );
+        att.pit  = ( (u16)(*(data_buf+10)<<8)|*(data_buf+11) );
+	}
+	
 	if(*(data_buf+2)==0X10)								//PID1
     {
 //        ctrl_1.PID[PIDROLL].kp  = 0.001*( (vs16)(*(data_buf+4)<<8)|*(data_buf+5) );

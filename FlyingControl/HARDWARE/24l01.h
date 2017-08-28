@@ -13,7 +13,8 @@
 //Copyright(C) 广州市星翼电子科技有限公司 2009-2019
 //All rights reserved									  
 //////////////////////////////////////////////////////////////////////////////////
-    
+
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 //NRF24L01寄存器操作命令
 #define NRF_READ_REG    0x00  //读配置寄存器,低5位为寄存器地址
@@ -25,7 +26,7 @@
 #define REUSE_TX_PL     0xE3  //重新使用上一包数据,CE为高,数据包被不断发送.
 #define NOP             0xFF  //空操作,可以用来读状态寄存器	 
 //SPI(NRF24L01)寄存器地址
-#define NRF_CONFIG          0x00  //配置寄存器地址;bit0:1接收模式,0发射模式;bit1:电选择;bit2:CRC模式;bit3:CRC使能;
+#define CONFIG          0x00  //配置寄存器地址;bit0:1接收模式,0发射模式;bit1:电选择;bit2:CRC模式;bit3:CRC使能;
                               //bit4:中断MAX_RT(达到最大重发次数中断)使能;bit5:中断TX_DS使能;bit6:中断RX_DR使能
 #define EN_AA           0x01  //使能自动应答功能  bit0~5,对应通道0~5
 #define EN_RXADDR       0x02  //接收地址允许,bit0~5,对应通道0~5
@@ -61,11 +62,23 @@
 #define NRF24L01_CE   PAout(3) //24L01片选信号
 #define NRF24L01_CSN  PAout(2) //SPI片选信号	   
 #define NRF24L01_IRQ  PBin(5)  //IRQ主机数据输入
+
 //24L01发送接收数据宽度定义
 #define TX_ADR_WIDTH    5   	//5字节的地址宽度
 #define RX_ADR_WIDTH    5   	//5字节的地址宽度
 #define TX_PLOAD_WIDTH  32  	//32字节的用户数据宽度
 #define RX_PLOAD_WIDTH  32  	//32字节的用户数据宽度
+
+#define DATA_PACKET             32      //?????????????(1~32)
+#define RX_FIFO_PACKET_NUM      80      //?? FIFO ? ? ?? ( ??? ????? ???????,?? ????? )
+#define ADR_WIDTH               5       //??????(3~5)
+#define IS_CRC16                1       //1???? CRC16,0?? ??CRC8 (0~1)
+#define CHANAL          40                              //????
+//?????????
+#define TX_FULL     0x01      
+#define MAX_RT      0x10       
+#define TX_DS       0x20        
+#define RX_DR       0x40       
 									   	   
 typedef struct class_nrf{
 void (*Init)(void);					//初始化
@@ -89,6 +102,10 @@ u8 NRF24L01_Write_Reg(u8 reg, u8 value);		//写寄存器
 u8 NRF24L01_Check(void);						//检查24L01是否存在
 u8 NRF24L01_TxPacket(u8 *txbuf);				//发送一个包的数据
 u8 NRF24L01_RxPacket(u8 *rxbuf);				//接收一个包的数据
+void NRF24L01_Int_IRQ_Init(void);	//IRQn中断初始化
+
+void EXTI9_5_IRQHandler(void);
+
 #endif
 
 

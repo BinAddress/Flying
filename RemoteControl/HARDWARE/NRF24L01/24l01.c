@@ -9,7 +9,7 @@
     
 u8 TX_ADDRESS[TX_ADR_WIDTH]={0x34,0x45,0x17,0x10,0x01}; //发送地址
 u8 RX_ADDRESS[RX_ADR_WIDTH]={0x34,0x45,0x17,0x10,0x01};
-u8 nrf_mode_flag = 0;
+
 
 //初始化24L01的IO口
 void NRF24L01_Init(void)
@@ -26,7 +26,6 @@ void NRF24L01_Init(void)
  	GPIO_Init(GPIOE, &GPIO_InitStructure);	//初始化指定IO
  	GPIO_SetBits(GPIOE,GPIO_Pin_1);//上拉				
  	
-
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1|GPIO_Pin_2;	//PG8 7 推挽 	  
  	GPIO_Init(GPIOE, &GPIO_InitStructure);//初始化指定IO
   
@@ -154,14 +153,20 @@ u8 NRF24L01_Write_Buf(u8 reg, u8 *pBuf, u8 len)
 //返回值:发送完成状况
 u8 NRF24L01_TxPacket(u8 *txbuf)
 {
+	NRF24L01_TX_Mode();
+	
 	u8 sta;
  	SPI2_SetSpeed(SPI_BaudRatePrescaler_8);//spi速度为9Mhz（24L01的最大SPI时钟为10Mhz）   
 	NRF24L01_CE=0;
-  	NRF24L01_Write_Buf(WR_TX_PLOAD,txbuf,TX_PLOAD_WIDTH);//写数据到TX BUF  32个字节
+  NRF24L01_Write_Buf(WR_TX_PLOAD,txbuf,TX_PLOAD_WIDTH);//写数据到TX BUF  32个字节
  	NRF24L01_CE=1;//启动发送	   
-	while(NRF24L01_IRQ!=0);//等待发送完成
+	
+	//while(NRF24L01_IRQ!=0);//等待发送完成
+	delay_ms(5);
 	sta=NRF24L01_Read_Reg(STATUS);  //读取状态寄存器的值	   
 	NRF24L01_Write_Reg(NRF_WRITE_REG+STATUS,sta); //清除TX_DS或MAX_RT中断标志
+	
+	NRF24L01_RX_Mode();
 	if(sta&MAX_TX)//达到最大重发次数
 	{
 		NRF24L01_Write_Reg(FLUSH_TX,0xff);//清除TX FIFO寄存器 
@@ -211,9 +216,6 @@ void NRF24L01_RX_Mode(void)
     NRF24L01_Write_Reg(FLUSH_RX, NOP);                    //??RX FIFO???
 
     NRF24L01_CE=1;
-	
-		nrf_mode_flag = 0;
-	
 }					
 
 //该函数初始化NRF24L01到TX模式
@@ -233,8 +235,6 @@ void NRF24L01_TX_Mode(void)
     NRF24L01_Write_Reg(NRF_WRITE_REG + CONFIG, 0x0A | (IS_CRC16 << 2)); //???????????;PWR_UP,EN_CRC,16BIT_CRC,????,??????
 
     NRF24L01_CE=1;
-	
-		nrf_mode_flag = 1;
 }
 
 void NRF24L01_Int_IRQ_Init(void)
@@ -265,29 +265,40 @@ u8 nrf_rx_buf[32] = {0};
 void EXTI3_IRQHandler(void)
 {
 	u8 i;
-
-//	if(!nrf_mode_flag)	//接收模式
-	{
-		NRF24L01_CE=0;
+	u8 state = 0;
 	
-		if(!NRF24L01_RxPacket(nrf_rx_buf))
-		{
-			if(nrf_rx_buf[0] == 0xAA && nrf_rx_buf[1] == 0xAA)
-			{
-				for(i = 0; i < 32; i++)
+		 state = NRF24L01_Read_Reg(STATUS);
+		 NRF24L01_Write_Reg(NRF_WRITE_REG + STATUS, state);
+	
+		if((state & RX_DR)== RX_DR) 
+    {
+				NRF24L01_CE=0;				
+				NRF24L01_Read_Buf(RD_RX_PLOAD, nrf_rx_buf, RX_PLOAD_WIDTH); //接收数据		
+				NRF24L01_CE=1;  
+				
+				if(nrf_rx_buf[0] == 0xAA && nrf_rx_buf[1] == 0xAA)
 				{
-					BIN_DT_Data_Receive_Prepare(nrf_rx_buf[i]);
-					nrf_rx_buf[i] = 0;
-				}			
-			}		
-		}
-		NRF24L01_CE=1;	
-	}
-//	else
-//	{
-//		NRF24L01_Write_Reg(FLUSH_RX,0xff);//清除RX FIFO寄存器 	
-//	}
+					for(i = 0; i < 32; i++)
+					{
+						BIN_DT_Data_Receive_Prepare(nrf_rx_buf[i]);
+						nrf_rx_buf[i] = 0;
+					}			
+				}                               
+    }
 
+    if((state & TX_DS)== TX_DS) //发送成功
+    {
+       NRF24L01_RX_Mode();
+    }
+		
+		if((state & MAX_RT) == MAX_RT) 
+		{
+				NRF24L01_RX_Mode();
+		}	
+		
+	NRF24L01_Write_Reg(FLUSH_TX, NOP); //清楚缓冲寄存器
+	NRF24L01_Write_Reg(FLUSH_RX, NOP);//清除缓冲寄存器
+	NRF24L01_Write_Reg(NRF_WRITE_REG+STATUS,state); //清除中断
 	EXTI_ClearITPendingBit(EXTI_Line3);  //清除LINE3上的中断标志位  
 }
 

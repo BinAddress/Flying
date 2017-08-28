@@ -49,7 +49,6 @@ void SPI2_Init(void)
 	
 	SPI2_ReadWriteByte(0xff);//启动传输		 
  
-
 }   
 //SPI 速度设置函数
 //SpeedSet:

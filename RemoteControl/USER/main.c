@@ -99,8 +99,8 @@
 			att.thr=rocker.Read(ADC_Channel_12)>>1;
 			att.yaw=rocker.Read(ADC_Channel_13)>>1;	
 					
-			Display();
-			Key_Fun();
+//			Display();
+//			Key_Fun();
 	}	  
 	
 }

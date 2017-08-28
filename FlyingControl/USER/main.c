@@ -51,44 +51,49 @@ int main(void)
 	float pitch,roll,yaw; 	        //欧拉角
 
 	delay_init();                //初始化延时函数
-//	uart_init(500000);              //初始化USART
+	uart_init(115200);              //初始化USART
 	
 	PWM_Init();
 	
-//	while(mpu_dmp_init())
-//	{   
-// 		delay_ms(200);
-//	}
+	while(mpu_dmp_init())
+	{   
+ 		delay_ms(200);
+	}
 	
 	nrf.Init = NRF24L01_Init;
 	nrf.Check = NRF24L01_Check;
 	nrf.Set_Rx_Mode = NRF24L01_RX_Mode;	 
 	nrf.Set_Tx_Mode = NRF24L01_TX_Mode;
 	 
-	nrf.Init();
-	while(nrf.Check());
-	nrf.Set_Rx_Mode();
+	NRF24L01_Init();
+	while(NRF24L01_Check())
+	{
 	
-   
+	}
+	
+	printf("Init OK\r\n");
+	
     while(1)
     {
-//			if(mpu_mpl_get_data(&pitch,&roll,&yaw)==0)
-//			{
-//					MPU_Get_Accelerometer(&mpu9250.accel.x,&mpu9250.accel.y,&mpu9250.accel.z);	//得到加速度传感器数据
-//					MPU_Get_Gyroscope(&mpu9250.gyro.x,&mpu9250.gyro.y,&mpu9250.gyro.z);	//得到陀螺仪数据
-//					MPU_Get_Magnetometer(&mpu9250.mag.x,&mpu9250.mag.y,&mpu9250.mag.z);			
-//				
-//					aircraft.pit = (short int)(pitch*100);
-//					aircraft.rol = (short int)(roll*100);
-//					aircraft.yaw = (short int)(yaw*100);
-//			
-//					
-//			}
+
 			
-			motor.PWM_1 = 1000;
-			motor.PWM_2 = 2000;
-			motor.PWM_3 = 3000;
-			motor.PWM_4 = 4000;
+			if(mpu_mpl_get_data(&pitch,&roll,&yaw)==0)
+			{
+					MPU_Get_Accelerometer(&mpu9250.accel.x,&mpu9250.accel.y,&mpu9250.accel.z);	//得到加速度传感器数据
+					MPU_Get_Gyroscope(&mpu9250.gyro.x,&mpu9250.gyro.y,&mpu9250.gyro.z);	//得到陀螺仪数据
+					MPU_Get_Magnetometer(&mpu9250.mag.x,&mpu9250.mag.y,&mpu9250.mag.z);			
+				
+					aircraft.pit = (short int)(pitch*100);
+					aircraft.rol = (short int)(roll*100);
+					aircraft.yaw = (short int)(yaw*100);
+			
+					
+			}
+			
+			motor.PWM_1 = (2048 - att.thr) << 2;
+			motor.PWM_2 = att.pit;
+			motor.PWM_3 = att.rol;
+			motor.PWM_4 = att.yaw;
 			motor.PWM_5 = 5000;
 			motor.PWM_6 = 6000;
 			

@@ -75,7 +75,7 @@ int _MLPrintLog (int priority, const char* tag, const char* fmt, ...)
 
     va_start(args, fmt);
 
-    length = vsprintf(buf, fmt, args);
+//    length = vsprintf(buf, fmt, args);
     if (length <= 0) {
         va_end(args);
         return length;

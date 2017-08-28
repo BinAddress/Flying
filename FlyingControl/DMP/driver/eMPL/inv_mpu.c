@@ -3501,11 +3501,11 @@ u8 mpu_mpl_get_data(float *pitch,float *roll,float *yaw)
     long data[9];
     int8_t accuracy;
     
-//	if(dmp_read_fifo(gyro, accel_short, quat, &sensor_timestamp, &sensors,&more)){
-//		printf("%d\r\n",dmp_read_fifo(gyro, accel_short, quat, &sensor_timestamp, &sensors,&more));
-//		return 1;	 
-//	
-//	}
+	if(dmp_read_fifo(gyro, accel_short, quat, &sensor_timestamp, &sensors,&more)){
+		printf("%d\r\n",dmp_read_fifo(gyro, accel_short, quat, &sensor_timestamp, &sensors,&more));
+		return 1;	 
+	
+	}
 	  while(dmp_read_fifo(gyro, accel_short, quat, &sensor_timestamp, &sensors,&more)){};
     if(sensors&INV_XYZ_GYRO)
     {

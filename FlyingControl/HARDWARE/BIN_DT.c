@@ -124,24 +124,14 @@ void BIN_DT_Data_Exchange(void)
 //移植时，用户应根据自身应用的情况，根据使用的通信方式，实现此函数
 void BIN_DT_Send_Data(u8 *dataToSend , u8 length)
 {	
-		u8 i = 0;
-	
 		bin_data_to_send[length+1] = 0;
 		if(length < 31)
 		{
-			NRF24L01_TX_Mode();
-			for(i = 0; i < 5; i++)
-			{
-				if(NRF24L01_TxPacket(dataToSend) == TX_OK)
-				{
-					break;
-				}
-			}
-			NRF24L01_RX_Mode();			
+			NRF24L01_TxPacket(dataToSend);
 		}
 		else
 		{
-			i = 0;
+			
 		}
 }
 
