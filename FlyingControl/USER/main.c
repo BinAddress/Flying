@@ -100,11 +100,11 @@ int main(void)
 			}
 			
 			motor.PWM_1 = (2048 - att.thr) << 2;
-			motor.PWM_2 = att.pit;
-			motor.PWM_3 = att.rol;
-			motor.PWM_4 = att.yaw;
-			motor.PWM_5 = 0;
-			motor.PWM_6 = 6000;
+			motor.PWM_2 = (2048 - att.thr) << 2;
+			motor.PWM_3 = (2048 - att.thr) << 2;
+			motor.PWM_4 = (2048 - att.thr) << 2;
+			motor.PWM_5 = (2048 - att.thr) << 2;
+			motor.PWM_6 = (2048 - att.thr) << 2;
 			v_dian = (short int)(Get_Adc(ADC_Channel_1)/11)*10;
 			
 			
