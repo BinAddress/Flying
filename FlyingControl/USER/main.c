@@ -34,6 +34,12 @@
 //							PWM6 PA11
 //              ----------------------------------------------------------------
 
+//							А¶СА
+//              ----------------------------------------------------------------
+//							TX	PB10
+//							RX	PB11
+//              ----------------------------------------------------------------
+
 #include "sys.h"
 #include "delay.h"
 #include "usart.h"
@@ -45,6 +51,7 @@
 #include "bin_dt.h"
 #include "ano_dt.h"
 #include "pwm.h"
+#include "adc.h"
 
 int main(void)
 {
@@ -71,6 +78,8 @@ int main(void)
 	
 	}
 	
+	Adc_Init();
+	
 	printf("Init OK\r\n");
 	
     while(1)
@@ -94,11 +103,15 @@ int main(void)
 			motor.PWM_2 = att.pit;
 			motor.PWM_3 = att.rol;
 			motor.PWM_4 = att.yaw;
-			motor.PWM_5 = 5000;
+			motor.PWM_5 = 0;
 			motor.PWM_6 = 6000;
+			v_dian = (short int)(Get_Adc(ADC_Channel_1)/11)*10;
+			
 			
 			BIN_DT_Data_Exchange();
 			PWM_Duty_Set();
+			
+			
 			
 	  }
 }

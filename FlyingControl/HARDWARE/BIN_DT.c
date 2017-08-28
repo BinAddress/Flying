@@ -4,6 +4,7 @@
 #include "24l01.h"
 #include "ano_dt.h"
 #include "delay.h"
+#include "adc.h"
 
 /////////////////////////////////////////////////////////////////////////////////////
 //数据拆分宏定义，在发送大于1字节的数据类型时，比如int16、float等，需要把数据拆分成单独字节进行发送
@@ -15,6 +16,7 @@
 bin_dt_flag_t bin_f;					//需要发送数据的标志
 u8 bin_data_to_send[32];	//发送数据缓存
 u16 bin_aux[6] = {0};
+u16 v_dian = 0; //电压
 
 struct class_attitude att = {0}; //遥控器信息
 struct class_motor motor= {0};	//电机转速
@@ -84,8 +86,10 @@ void BIN_DT_Data_Exchange(void)
 /////////////////////////////////////////////////////////////////////////////////////
 	else if(bin_f.send_power)
 	{
+		
 		bin_f.send_power = 0;
-		BIN_DT_Send_Power(123,456);
+		
+		BIN_DT_Send_Power(v_dian,456);
 	}
 /////////////////////////////////////////////////////////////////////////////////////
 	else if(bin_f.send_pid1)

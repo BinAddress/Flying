@@ -21,6 +21,7 @@
 
 dt_flag_t f;					//需要发送数据的标志
 u8 data_to_send[50];	//发送数据缓存
+
 struct class_attitude att = {0};	//遥控器控制信息
 struct class_motor motor= {0};	//电机转速
 struct class_aircraft aircraft = {0};	//飞机状态
@@ -89,7 +90,7 @@ void ANO_DT_Data_Exchange(void)
 	else if(f.send_power)
 	{
 		f.send_power = 0;
-		ANO_DT_Send_Power(123,456);
+		ANO_DT_Send_Power(v_dian,456);
 	}
 /////////////////////////////////////////////////////////////////////////////////////
 	else if(f.send_pid1)

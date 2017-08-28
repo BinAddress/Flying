@@ -20,6 +20,7 @@ struct coordinate mag;
 };
 
 extern struct class_mpu9250 mpu9250;
+extern u16 v_dian;
 
 typedef struct 
 {

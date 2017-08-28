@@ -14,7 +14,7 @@
 bin_dt_flag_t bin_f;					//需要发送数据的标志
 u8 bin_data_to_send[32];	//发送数据缓存
 struct class_mpu9250 mpu9250;
-
+u16 v_dian = 0;
 /////////////////////////////////////////////////////////////////////////////////////
 //Data_Exchange函数处理各种数据发送请求，比如想实现每5ms发送一次传感器数据至上位机，即在此函数内实现
 //此函数应由用户每1ms调用一次
@@ -79,7 +79,7 @@ void BIN_DT_Data_Exchange(void)
 	else if(bin_f.send_power)
 	{
 		bin_f.send_power = 0;
-//		BIN_DT_Send_Power(123,456);
+//		BIN_DT_Send_Power(v_dian,456);
 	}
 /////////////////////////////////////////////////////////////////////////////////////
 	else if(bin_f.send_pid1)
@@ -229,6 +229,10 @@ void BIN_DT_Data_Receive_Anl(u8 *data_buf,u8 num)
 		mpu9250.mag.y		=	(short int)(*(data_buf+18)<<8)|*(data_buf+19);
 		mpu9250.mag.z		=	(short int)(*(data_buf+20)<<8)|*(data_buf+21);
 		mpu9250.temp		=	(short int)(*(data_buf+21)<<8)|*(data_buf+23);
+	}
+	if(*(data_buf+2)==0X05) //电压电流
+	{
+		v_dian	=	(short int)(*(data_buf+4)<<8)|*(data_buf+5);
 	}
 	
 	if(*(data_buf+2)==0X06) //加速度角速度

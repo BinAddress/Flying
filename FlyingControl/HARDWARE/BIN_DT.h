@@ -24,8 +24,6 @@ typedef struct
 }bin_dt_flag_t;
 
 
-
-
 struct coordinate
 {
 short int x;
@@ -50,6 +48,7 @@ extern struct class_attitude att;
 extern struct class_motor motor;
 extern struct class_aircraft aircraft;
 extern struct class_mpu9250 mpu9250;
+extern u16 v_dian; //µÁ—π
 
 void BIN_DT_Data_Exchange(void);
 void BIN_DT_Data_Receive_Prepare(u8 data);
